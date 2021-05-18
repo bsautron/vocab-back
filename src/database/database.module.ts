@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+import { DynamicModule, Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+
 @Module({
     imports: [
         TypeOrmModule.forRootAsync({
@@ -14,7 +15,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
                     username: config.get<string>("POSTGRES_USER") ?? "test",
                     password: config.get<string>("POSTGRES_PASSWORD") ?? "test",
                     database: config.get<string>("POSTGRES_DB") ?? "test",
-                    entities: ["dist/**/*.entity.js"],
+                    entities: ["**/*.entity.js"],
                     logging: true,
                     synchronize: true,
                 };
@@ -23,4 +24,5 @@ import { TypeOrmModule } from "@nestjs/typeorm";
         }),
     ],
 })
-export class DatabaseModule { }
+export class DatabaseModule {
+}

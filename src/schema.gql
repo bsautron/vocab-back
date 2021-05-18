@@ -1,0 +1,83 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AddLocalesPayload {
+  es: String
+  fr: String
+}
+
+input AddTagPayload {
+  locales: AddLocalesPayload!
+  slug: String!
+}
+
+input AddWordPayload {
+  locales: AddLocalesPayload!
+  tags: [AddTagPayload!]!
+}
+
+type Category {
+  locales: Locales!
+  slug: String!
+  tags: [Tag!]!
+}
+
+interface ILocales {
+  es: String
+  fr: String
+}
+
+type Locales implements ILocales {
+  es: String
+  fr: String
+}
+
+type Mutation {
+  addWords(words: [AddWordPayload!]!): String!
+}
+
+type Query {
+  getContextTranslation(from: String!): [ReversoContext!]!
+  getSentenceByCategory: [Sentence!]!
+  searchTags(query: String!): [Tag!]!
+  word(filters: WordFilters): Word!
+  words(filters: WordFilters): [Word!]!
+}
+
+type ReversoContext {
+  examples: [ReversoExample!]
+  partOfSpeech: String
+  translation: String!
+}
+
+type ReversoExample {
+  es: String!
+  fr: String!
+}
+
+type Sentence {
+  addedBy: User!
+  category: Category!
+  locales: Locales!
+}
+
+type Tag {
+  locales: Locales!
+  slug: String!
+}
+
+type User {
+  email: String!
+  name: String!
+}
+
+type Word {
+  id: ID!
+  locales: Locales!
+  tags: [Tag!]!
+}
+
+input WordFilters {
+  tags: [String!]
+}
