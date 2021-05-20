@@ -20,7 +20,7 @@ export class CategoryService {
             .onConflict(`("slug") DO NOTHING`)
             .execute();
 
-        const targetCate = await this.categoriesRepository.findOneOrFail({ where: { slug: category.slug } })
+        const targetCate = await this.getCategoryBySlug(category.slug)
 
         for (const tag of category.tags) {
             const targetTag = await this.tagService.addTag(tag)
@@ -36,5 +36,9 @@ export class CategoryService {
                 })
         }
         return targetCate
+    }
+
+    async getCategoryBySlug(slug: string): Promise<Category> {
+        return this.categoriesRepository.findOneOrFail({ where: { slug } })
     }
 }

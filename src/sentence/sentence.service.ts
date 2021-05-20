@@ -15,8 +15,13 @@ export class SentenceService {
 
     ) { }
 
-    async getSentenceByCategory() {
-        return this.sentencesRepository.find()
+    async getSentencesByCategory(categorySlug: string): Promise<Sentence[]> {
+        const qb = await this.sentencesRepository.createQueryBuilder('sentence')
+            .leftJoinAndSelect('sentence.addedBy', 'user')
+            .leftJoinAndSelect('sentence.category', 'category')
+            .leftJoinAndSelect('category.tags', 'tags')
+
+        return qb.where('category.slug = :categorySlug', { categorySlug: categorySlug }).getMany()
     }
 
     async addNewSentences(sentences: AddSentencePayload[], userId: string) {

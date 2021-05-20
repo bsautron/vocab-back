@@ -17,10 +17,10 @@ export class Sentence {
     locales: Locales;
 
     @Field(() => User)
-    @ManyToOne(() => User, { eager: true })
-    addedBy: User
+    @ManyToOne(() => User, { lazy: true })
+    addedBy: Promise<User> | User
 
     @Field(() => Category)
-    @ManyToOne(() => Category, { eager: true, cascade: true })
-    category: Category
+    @ManyToOne(() => Category, { lazy: true, cascade: true })
+    category: Promise<Category> | Category
 }
