@@ -2,24 +2,9 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input AddLocalesPayload {
+type Category {
   es: String
   fr: String
-}
-
-input AddTagPayload {
-  locales: AddLocalesPayload!
-  slug: String!
-}
-
-input AddWordPayload {
-  locales: AddLocalesPayload!
-  tags: [AddTagPayload!]!
-}
-
-type Category {
-  locales: Locales!
-  slug: String!
   tags: [Tag!]!
 }
 
@@ -33,33 +18,15 @@ type Locales implements ILocales {
   fr: String
 }
 
-type Mutation {
-  addWords(words: [AddWordPayload!]!): String!
-}
-
 type Query {
-  getContextTranslation(from: String!): [ReversoContext!]!
-  getSentencesByCategory(category: String!): [Sentence!]!
-  searchTags(query: String!): [Tag!]!
-  word(filters: WordFilters): Word!
-  words(filters: WordFilters): [Word!]!
-}
-
-type ReversoContext {
-  examples: [ReversoExample!]
-  partOfSpeech: String
-  translation: String!
-}
-
-type ReversoExample {
-  es: String!
-  fr: String!
+  getSentencesByCategory(category: String): [Sentence!]!
 }
 
 type Sentence {
   addedBy: User!
   category: Category!
-  locales: Locales!
+  es: String
+  fr: String
 }
 
 type Tag {
@@ -70,14 +37,4 @@ type Tag {
 type User {
   email: String!
   name: String!
-}
-
-type Word {
-  id: ID!
-  locales: Locales!
-  tags: [Tag!]!
-}
-
-input WordFilters {
-  tags: [String!]
 }

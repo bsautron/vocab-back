@@ -4,7 +4,7 @@ import { Inject, Injectable } from "@nestjs/common";
 export class NeofjService {
     constructor(@Inject('session') protected readonly session) { }
 
-    async exec(query, variables) {
+    async run(query, variables?) {
         return this.session.run(query, variables)
     }
 }
