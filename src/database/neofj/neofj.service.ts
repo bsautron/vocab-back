@@ -32,11 +32,11 @@ export class NeofjService {
         }
 
         const id = uuid()
-        const props = [`id: "${id}"`]
+        const props = [`id: $id`]
         for (const prop in data) {
             props.push(`${prop}: $${prop}`)
         }
         const query = `CREATE (item:${data.constructor.name} {${props.join(', ')}})`
-        return this.run(query, data)
+        return this.run(query, { id, ...data })
     }
 }
