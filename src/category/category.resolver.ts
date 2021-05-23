@@ -1,9 +1,11 @@
-import { Field, InputType, Parent, ResolveField, Resolver } from '@nestjs/graphql';
+import { Field, InputType, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { NeofjService } from '../database/neofj/neofj.service';
 import { Tag } from '../tag/tag.entity';
 import { ILocales } from '../locales/locales.interface.entity';
 import { AddTagPayload } from '../tag/tag.resolver';
 import { Category } from './category.entity';
+import { TagService } from '../tag/tag.service';
+import { CategoryService } from './category.service';
 
 @InputType()
 export class AddCategoryPayload implements ILocales {
@@ -24,11 +26,18 @@ export class AddCategoryPayload implements ILocales {
 
 @Resolver(() => Category)
 export class CategoryResolver {
-    constructor(protected neofjService: NeofjService) { }
+    constructor(
+        protected tagService: TagService,
+        protected categoryService: CategoryService,
+    ) { }
+
+    @Query(() => [Category])
+    async categories(): Promise<Category[]> {
+        return this.categoryService.getCategories()
+    }
 
     @ResolveField()
     async tags(@Parent() category: Category): Promise<Tag[]> {
-        const { records } = await this.neofjService.run('MATCH (c:Category {id: $id})-[:HAVE_TAG]->(t:Tag) return DISTINCT t', { id: category.id })
-        return records.map(({ _fields }) => _fields[0].properties)
+        return this.tagService.tagsByCetagoryId(category.id)
     }
 }

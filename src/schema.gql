@@ -6,6 +6,8 @@ type Category implements ILocales {
   es: String
   fr: String
   id: ID!
+  image: String
+  slug: String!
   tags: [Tag!]
 }
 
@@ -15,6 +17,7 @@ interface ILocales {
 }
 
 type Query {
+  categories: [Category!]!
   getSentencesByCategory(category: String!): [Sentence!]!
 }
 
