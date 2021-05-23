@@ -2,6 +2,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddSentencePayload {
+  es: String
+  fr: String
+  relations: SentenceRelationsPayload!
+}
+
 type Category implements ILocales {
   es: String
   fr: String
@@ -16,6 +22,10 @@ interface ILocales {
   fr: String
 }
 
+type Mutation {
+  addNewSentence(sentence: AddSentencePayload!): Sentence!
+}
+
 type Query {
   categories: [Category!]!
   getSentencesByCategory(category: String!): [Sentence!]!
@@ -27,6 +37,14 @@ type Sentence implements ILocales {
   es: String
   fr: String
   id: ID!
+}
+
+input SentenceRelationsCategoryPayload {
+  id: String!
+}
+
+input SentenceRelationsPayload {
+  category: SentenceRelationsCategoryPayload!
 }
 
 type Tag implements ILocales {

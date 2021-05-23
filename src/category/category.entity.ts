@@ -4,7 +4,7 @@ import { ILocales } from '../locales/locales.interface.entity';
 import { Tag } from '../tag/tag.entity';
 
 @ObjectType({ implements: [ILocales] })
-export class Category extends INode {
+export class Category extends INode<Category> {
     @Field()
     slug: string
 
