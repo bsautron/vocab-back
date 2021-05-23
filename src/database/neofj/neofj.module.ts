@@ -36,11 +36,9 @@ export class NeofjModule {
                  * finaly provide the session for the exported service 
                  */
                 {
-                    provide: 'session',
+                    provide: 'neo4j',
                     useFactory: async (config: NeofjOptions) => {
-                        return neo4j
-                            .driver(config.uri, neo4j.auth.basic(config.user, config.password))
-                            .session()
+                        return neo4j.driver(config.uri, neo4j.auth.basic(config.user, config.password))
                     },
                     inject: [CONFIG]
                 },

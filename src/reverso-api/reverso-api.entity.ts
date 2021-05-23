@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { ILocales } from '../locales/locales.interface.entity';
 
 @ObjectType()
 export class ReversoContext {
@@ -13,11 +14,5 @@ export class ReversoContext {
 
 }
 
-@ObjectType()
-export class ReversoExample {
-    @Field()
-    fr: string
-
-    @Field()
-    es: string
-}
+@ObjectType({ implements: [ILocales] })
+export class ReversoExample { }

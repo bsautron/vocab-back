@@ -1,9 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { INode } from '../database/neofj/neofj.resolver';
 import { ILocales } from '../locales/locales.interface.entity';
 import { Tag } from '../tag/tag.entity';
 
-@ObjectType()
-export class Category extends ILocales {
-    @Field(() => [Tag])
-    tags: Tag[];
+@ObjectType({ implements: [ILocales] })
+export class Category extends INode {
+    @Field(() => [Tag], { nullable: true })
+    tags?: Tag[];
 }

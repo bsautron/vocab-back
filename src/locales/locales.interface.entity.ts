@@ -11,9 +11,6 @@ export abstract class ILocales {
     es?: string;
 }
 
-@ObjectType({ implements: ILocales })
-export class Locales { }
-
 
 // @InputType()
 // export class AddLocalesPayload implements ILocales {

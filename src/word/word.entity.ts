@@ -1,14 +1,10 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Locales } from '../locales/locales.interface.entity';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { INode } from '../database/neofj/neofj.resolver';
+import { ILocales } from '../locales/locales.interface.entity';
 import { Tag } from '../tag/tag.entity';
 
-@ObjectType()
-export class Word {
-    @Field(() => ID)
-    id: string;
-
-    @Field(() => Locales)
-    locales: Locales;
+@ObjectType({ implements: [ILocales] })
+export class Word extends INode {
 
     @Field(() => [Tag])
     tags: Tag[];

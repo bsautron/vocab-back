@@ -1,7 +1,6 @@
 import { Inject } from '@nestjs/common';
-import { Args, Field, InputType, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { ILocales, Locales } from '../locales/locales.interface.entity';
-import { ReversoContext } from '../reverso-api/reverso-api.entity';
+import { Field, InputType, Resolver } from '@nestjs/graphql';
+import { ILocales } from '../locales/locales.interface.entity';
 import { AddTagPayload } from '../tag/tag.resolver';
 import { Word } from './word.entity';
 import { WordService } from './word.service';
@@ -13,10 +12,16 @@ export class WordFilters {
 }
 
 @InputType()
-export class AddWordPayload extends ILocales {
+export class AddWordPayload implements ILocales {
 
     @Field(() => [AddTagPayload])
     tags: AddTagPayload[]
+
+    @Field({ nullable: true })
+    fr?: string;
+
+    @Field({ nullable: true })
+    es?: string;
 }
 
 

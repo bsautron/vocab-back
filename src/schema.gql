@@ -2,18 +2,14 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Category {
+type Category implements ILocales {
   es: String
   fr: String
-  tags: [Tag!]!
+  id: ID!
+  tags: [Tag!]
 }
 
 interface ILocales {
-  es: String
-  fr: String
-}
-
-type Locales implements ILocales {
   es: String
   fr: String
 }
@@ -22,19 +18,23 @@ type Query {
   getSentencesByCategory(category: String): [Sentence!]!
 }
 
-type Sentence {
+type Sentence implements ILocales {
   addedBy: User!
   category: Category!
   es: String
   fr: String
+  id: ID!
 }
 
-type Tag {
-  locales: Locales!
+type Tag implements ILocales {
+  es: String
+  fr: String
+  id: ID!
   slug: String!
 }
 
 type User {
   email: String!
+  id: ID!
   name: String!
 }

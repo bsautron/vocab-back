@@ -5,9 +5,15 @@ import { Tag } from './tag.entity';
 import { TagService } from './tag.service';
 
 @InputType()
-export class AddTagPayload extends ILocales {
+export class AddTagPayload implements ILocales {
     @Field()
     slug: string
+
+    @Field({ nullable: true })
+    fr?: string;
+
+    @Field({ nullable: true })
+    es?: string;
 }
 
 @Resolver(() => Tag)
