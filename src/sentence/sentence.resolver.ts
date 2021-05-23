@@ -28,12 +28,13 @@ export class SentenceResolver {
     ) { }
 
     @Query(() => [Sentence])
-    async getSentencesByCategory(@Args({ name: 'category', type: () => String, nullable: true }) category?: string): Promise<Sentence[]> {
+    async getSentencesByCategory(@Args({ name: 'category', type: () => String }) category: string): Promise<Sentence[]> {
         // Faire des match differents selon les ARGS
         // Toujour return un seul type de node (ici r)
         // Meme si je complexify lq query
         // les fieldresolver iront rematcher les sous node
-        const { records } = await this.neofjService.run('match (s:Sentence) return s')
+
+        const { records } = await this.neofjService.run('match (s:Sentence)-[:BELONGS_TO]->(c:Category { slug: $slug }) return s', { slug: category })
         return records.map(({ _fields: [record] }) => {
             return record.properties
         })

@@ -29,7 +29,6 @@ export class CategoryResolver {
     @ResolveField()
     async tags(@Parent() category: Category): Promise<Tag[]> {
         const { records } = await this.neofjService.run('MATCH (c:Category {id: $id})-[:HAVE_TAG]->(t:Tag) return DISTINCT t', { id: category.id })
-        console.log('records:', JSON.stringify(records, null, 4)) /* dump variable */
         return records.map(({ _fields }) => _fields[0].properties)
     }
 }

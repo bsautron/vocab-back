@@ -15,7 +15,7 @@ interface ILocales {
 }
 
 type Query {
-  getSentencesByCategory(category: String): [Sentence!]!
+  getSentencesByCategory(category: String!): [Sentence!]!
 }
 
 type Sentence implements ILocales {
