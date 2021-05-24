@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { Field, InputType, Resolver } from '@nestjs/graphql';
-import { ILocales } from '../locales/locales.interface.entity';
+import { ALocales } from '../locales/locales.interface.entity';
 import { AddTagPayload } from '../tag/tag.resolver';
 import { Word } from './word.entity';
 import { WordService } from './word.service';
@@ -12,7 +12,7 @@ export class WordFilters {
 }
 
 @InputType()
-export class AddWordPayload implements ILocales {
+export class AddWordPayload implements ALocales {
 
     @Field(() => [AddTagPayload])
     tags: AddTagPayload[]

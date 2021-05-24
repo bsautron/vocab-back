@@ -2,24 +2,24 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+interface ALocales {
+  es: String
+  fr: String
+}
+
 input AddSentencePayload {
   es: String
   fr: String
   relations: SentenceRelationsPayload!
 }
 
-type Category implements ILocales {
+type Category implements ALocales {
   es: String
   fr: String
   id: ID!
   image: String
   slug: String!
   tags: [Tag!]
-}
-
-interface ILocales {
-  es: String
-  fr: String
 }
 
 type Mutation {
@@ -31,8 +31,7 @@ type Query {
   getSentencesByCategory(category: String!): [Sentence!]!
 }
 
-type Sentence implements ILocales {
-  addedBy: User!
+type Sentence implements ALocales {
   category: Category!
   es: String
   fr: String
@@ -47,15 +46,9 @@ input SentenceRelationsPayload {
   category: SentenceRelationsCategoryPayload!
 }
 
-type Tag implements ILocales {
+type Tag implements ALocales {
   es: String
   fr: String
   id: ID!
   slug: String!
-}
-
-type User {
-  email: String!
-  id: ID!
-  name: String!
 }

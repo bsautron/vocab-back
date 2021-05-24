@@ -4,6 +4,7 @@ import { CategoryService } from '../category/category.service';
 import { Sentence } from './sentence.entity';
 import { AddSentencePayload } from './sentence.resolver';
 import { v4 as uuid } from 'uuid'
+import { Category } from '../category/category.entity';
 
 @Injectable()
 export class SentenceService {
@@ -14,23 +15,23 @@ export class SentenceService {
     }
 
     async addNewSentence({ relations, ...sentence }: AddSentencePayload): Promise<Sentence> {
+        const sen = await this.neofjService.create(Sentence, sentence)
+        // const cate = await this.neofjService.create(Category, { slug: 'travel/airport', fr: 'AIZE', es: 'siusdf' })
+        const cate = await this.neofjService.matchOne(Category, { id: relations.category.id })
         const { records } = await this.neofjService.run(`
-            CREATE (s:Sentence { id: $sentence.id, fr: $sentence.fr, es: $sentence.es })
-            MERGE (c:Category { id: $relations.category.id })
+            MATCH (s:Sentence {id: $sentence.id})
+            MATCH (c:Category {id: $relations.category.id})
             MERGE (s)-[:BELONGS_TO]->(c)
             RETURN s
         `, {
-            sentence: {
-                id: uuid(),
-                ...sentence
-            },
+            sentence: { id: sen.id },
             relations: {
                 category: {
-                    id: relations.category.id
+                    id: cate.id
                 }
             }
         })
-        return records.map(({ _fields }) => _fields[0].properties)
+        return records.map(({ _fields }) => _fields[0].properties)[0]
     }
 
 }

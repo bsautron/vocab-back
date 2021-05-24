@@ -1,11 +1,11 @@
 import { Inject } from '@nestjs/common';
 import { Args, Resolver, Query, InputType, Field } from '@nestjs/graphql';
-import { ILocales, } from '../locales/locales.interface.entity';
+import { ALocales, } from '../locales/locales.interface.entity';
 import { Tag } from './tag.entity';
 import { TagService } from './tag.service';
 
 @InputType()
-export class AddTagPayload implements ILocales {
+export class AddTagPayload implements ALocales {
     @Field()
     slug: string
 

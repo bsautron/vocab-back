@@ -1,6 +1,6 @@
 import { Args, Field, InputType, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { NeofjService } from '../database/neofj/neofj.service';
-import { ILocales } from '../locales/locales.interface.entity';
+import { ALocales } from '../locales/locales.interface.entity';
 import { Sentence } from './sentence.entity';
 import { SentenceService } from './sentence.service';
 import { Category } from '../category/category.entity';
@@ -18,7 +18,7 @@ export class SentenceRelationsPayload {
 }
 
 @InputType()
-export class AddSentencePayload implements ILocales {
+export class AddSentencePayload implements ALocales {
 
     @Field(() => SentenceRelationsPayload)
     relations: SentenceRelationsPayload;
@@ -51,7 +51,7 @@ export class SentenceResolver {
         })
     }
 
-    @ResolveField()
+    @ResolveField(() => Category)
     async category(@Parent() sentence: Sentence): Promise<Category> {
         const { records } = await this.neofjService.run('MATCH (s:Sentence {id: $id})-[:BELONGS_TO]->(c:Category) return DISTINCT c', { id: sentence.id })
         return records[0]._fields[0].properties
@@ -59,6 +59,7 @@ export class SentenceResolver {
 
     @Mutation(() => Sentence)
     async addNewSentence(@Args('sentence') sentence: AddSentencePayload): Promise<Sentence> {
-        return this.sentenceService.addNewSentence(sentence)
+        const res = await this.sentenceService.addNewSentence(sentence)
+        return res
     }
 }

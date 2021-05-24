@@ -1,10 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { INode } from '../database/neofj/neofj.resolver';
-import { ILocales } from '../locales/locales.interface.entity';
+import { ALocales } from '../locales/locales.interface.entity';
 import { Tag } from '../tag/tag.entity';
 
-@ObjectType({ implements: [ILocales] })
-export class Category extends INode<Category> {
+@ObjectType({ implements: [ALocales] })
+export class Category extends INode<Category> implements ALocales {
     @Field()
     slug: string
 
@@ -13,4 +13,10 @@ export class Category extends INode<Category> {
 
     @Field(() => [Tag], { nullable: true })
     tags?: Tag[];
+
+    @Field({ nullable: true })
+    fr?: string;
+
+    @Field({ nullable: true })
+    es?: string;
 }
