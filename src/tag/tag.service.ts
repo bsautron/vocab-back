@@ -1,14 +1,20 @@
 import { Injectable } from '@nestjs/common';
+import { Category } from '../category/category.entity';
+import { INode } from '../database/neofj/neofj.resolver';
 import { NeofjService } from '../database/neofj/neofj.service';
 import { Tag } from './tag.entity';
-import { AddTagPayload } from './tag.resolver';
 
 @Injectable()
 export class TagService {
     constructor(protected neofjService: NeofjService) { }
 
     async tagsByCetagoryId(categoryId: string): Promise<Tag[]> {
-        const { records } = await this.neofjService.run('MATCH (c:Category {id: $id})-[:HAVE_TAG]->(t:Tag) return DISTINCT t', { id: categoryId })
-        return records.map(({ _fields }) => _fields[0].properties)
+        const { records } = await this.neofjService.run('MATCH (c:Category {id: $category.id})-[:HAVE_TAG]->(t:Tag) return DISTINCT t', [{
+            alias: 'category',
+            properties: INode.createNode(Category, { id: categoryId })
+        }]
+        )
+        console.log('records:', records) /* dump variable */
+        return records.map(record => record.toObject().t.properties)
     }
 }

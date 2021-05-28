@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ReversoApiService } from '../reverso-api/reverso-api.service';
 import { Word } from './word.entity';
-import { AddWordPayload, WordFilters } from './word.resolver';
+// import { AddWordPayload, WordFilters } from './word.resolver';
 import { ReversoContext } from '../reverso-api/reverso-api.entity';
 import { TagService } from '../tag/tag.service';
 

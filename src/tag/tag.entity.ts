@@ -1,9 +1,13 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { INode } from '../database/neofj/neofj.resolver';
-import { ALocales } from '../locales/locales.interface.entity';
+import { ILocales } from '../locales/locales.interface.entity';
 
-@ObjectType({ implements: [ALocales] })
-export class Tag extends INode<Tag> {
+@ObjectType({ implements: [INode, ILocales] })
+export class Tag implements INode, ILocales {
+    id: string
+    fr?: string;
+    es?: string;
+
     @Field()
     slug: string;
 

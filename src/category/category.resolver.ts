@@ -1,20 +1,20 @@
-import { Field, InputType, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Field, InputType, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { NeofjService } from '../database/neofj/neofj.service';
 import { Tag } from '../tag/tag.entity';
-import { ALocales } from '../locales/locales.interface.entity';
+import { ILocales } from '../locales/locales.interface.entity';
 import { AddTagPayload } from '../tag/tag.resolver';
 import { Category } from './category.entity';
 import { TagService } from '../tag/tag.service';
 import { CategoryService } from './category.service';
 
 @InputType()
-export class AddCategoryPayload implements ALocales {
+export class AddCategoryPayload implements ILocales {
 
     @Field()
     slug: string
 
-    @Field(() => [AddTagPayload])
-    tags: AddTagPayload[]
+    @Field({ nullable: true })
+    image?: string
 
     @Field({ nullable: true })
     fr?: string;
@@ -30,6 +30,14 @@ export class CategoryResolver {
         protected tagService: TagService,
         protected categoryService: CategoryService,
     ) { }
+
+    @Mutation(() => [Category])
+    async addCategories(@Args({ name: 'categories', type: () => [AddCategoryPayload] }) categories: AddCategoryPayload[]): Promise<Category[]> {
+        const c = await Promise.all(categories.map(category => this.categoryService.addCategory(category)))
+        console.log('c:', c) /* dump variable */
+        return c
+
+    }
 
     @Query(() => [Category])
     async categories(): Promise<Category[]> {

@@ -2,18 +2,14 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-interface ALocales {
+input AddCategoryPayload {
   es: String
   fr: String
+  image: String
+  slug: String!
 }
 
-input AddSentencePayload {
-  es: String
-  fr: String
-  relations: SentenceRelationsPayload!
-}
-
-type Category implements ALocales {
+type Category implements ILocales & INode {
   es: String
   fr: String
   id: ID!
@@ -22,31 +18,24 @@ type Category implements ALocales {
   tags: [Tag!]
 }
 
+interface ILocales {
+  es: String
+  fr: String
+}
+
+interface INode {
+  id: ID!
+}
+
 type Mutation {
-  addNewSentence(sentence: AddSentencePayload!): Sentence!
+  addCategories(categories: [AddCategoryPayload!]!): [Category!]!
 }
 
 type Query {
   categories: [Category!]!
-  getSentencesByCategory(category: String!): [Sentence!]!
 }
 
-type Sentence implements ALocales {
-  category: Category!
-  es: String
-  fr: String
-  id: ID!
-}
-
-input SentenceRelationsCategoryPayload {
-  id: String!
-}
-
-input SentenceRelationsPayload {
-  category: SentenceRelationsCategoryPayload!
-}
-
-type Tag implements ALocales {
+type Tag implements ILocales & INode {
   es: String
   fr: String
   id: ID!

@@ -2,7 +2,7 @@ import { Field, InputType, InterfaceType, ObjectType } from "@nestjs/graphql";
 
 
 @InterfaceType()
-export abstract class ALocales {
+export abstract class ILocales {
 
     @Field({ nullable: true })
     fr?: string;
@@ -14,7 +14,7 @@ export abstract class ALocales {
 
 
 // @InputType()
-// export class AddLocalesPayload implements ALocales {
+// export class AddLocalesPayload implements ILocales {
 //     @Field({ nullable: true })
 //     fr?: string;
 

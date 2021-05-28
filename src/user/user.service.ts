@@ -8,6 +8,6 @@ export class UserService {
     ) { }
 
     async createUser({ name }: { name: string }) {
-        return this.neoService.run('CREATE (a:Person {name: $name}) RETURN a', { name })
+        // return this.neoService.run('CREATE (a:Person {name: $name}) RETURN a', { name })
     }
 }
