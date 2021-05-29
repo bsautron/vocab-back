@@ -2,10 +2,10 @@ import { Min, ValidationError } from "class-validator"
 import { INode } from "./neofj.resolver"
 
 class TestNode extends INode {
-    @Min(50) numberProp?: number
-    stringProp: string
-    boolProp: boolean
-    objProp?: Record<string, unknown>
+    @Min(50) optionalNumberProp?: number
+    requiredStringProp: string
+    optionalBoolProp: boolean
+    optionalObjProp?: Record<string, unknown>
 }
 
 describe('NeofjResolver', () => {
@@ -23,14 +23,14 @@ describe('NeofjResolver', () => {
                 expect(() => INode.createNode({
                     alias: 'A',
                     instancor: TestNode,
-                    props: { stringProp: 'sdfqs', boolProp: true, id: "sdf" }
+                    props: { requiredStringProp: 'sdfqs', optionalBoolProp: true, id: "sdf" }
                 })).toThrowError(ValidationError)
             })
             it('Should not throw when \'id\' id an uuid', () => {
                 const node = INode.createNode({
                     alias: 'A',
                     instancor: TestNode,
-                    props: { stringProp: 'sdfqs', boolProp: true, id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81" }
+                    props: { requiredStringProp: 'sdfqs', optionalBoolProp: true, id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81" }
                 })
                 expect(node).toBeDefined()
             })
@@ -39,9 +39,27 @@ describe('NeofjResolver', () => {
 
                     alias: 'A',
                     instancor: TestNode,
-                    props: { stringProp: 'sdfqs', numberProp: 40, boolProp: true, id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81" }
+                    props: { requiredStringProp: 'sdfqs', optionalNumberProp: 40, optionalBoolProp: true, id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81" }
                 })).toThrowError(ValidationError)
 
+            })
+        })
+        describe('static createNodeOptional', () => {
+            it('Should generate a partial node', () => {
+                const node = INode.createNodeOptional({
+                    alias: 'A',
+                    instancor: TestNode,
+                    props: { optionalBoolProp: true }
+                })
+                expect(node.properties.optionalBoolProp).toBe(true)
+            })
+            it('Should not generate required props', () => {
+                const node = INode.createNodeOptional({
+                    alias: 'A',
+                    instancor: TestNode,
+                    props: { optionalBoolProp: true }
+                })
+                expect(node.properties.requiredStringProp).not.toBeDefined()
             })
         })
         describe('static createNodeWithId', () => {
@@ -49,9 +67,11 @@ describe('NeofjResolver', () => {
                 const node = INode.createNodeWithId({
                     alias: 'A',
                     instancor: TestNode,
-                    props: { stringProp: 'sdfqs', boolProp: true }
+                    props: { requiredStringProp: 'sdfqs', optionalBoolProp: true }
                 })
                 expect(node.properties.id).toBeDefined()
+                expect(node.properties.requiredStringProp).toBe('sdfqs')
+                expect(node.properties.optionalBoolProp).toBe(true)
             })
         })
     })

@@ -1,12 +1,5 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import {
-    validateOrReject, validateSync,
-} from 'class-validator';
-import { User } from "../../user/user.entity";
-import { v4 as uuid } from 'uuid'
 import { INode, ValidNode } from "./neofj.resolver";
-import { Sentence } from "../../sentence/sentence.entity";
-import { Transaction } from "neo4j-driver";
 
 /**
  * Used for map alias -> properties
@@ -15,14 +8,6 @@ interface ValidVariables {
     alias: string,
     properties: ValidNode<INode, any>
 }
-// interface ValidRelationship {
-//     alias: string,
-//     props: {
-//         id: string,
-//         [key: string]: unknown
-//     }
-// }
-
 /**
  * One line to cumpute for neofj db
  */
@@ -61,13 +46,16 @@ export class NeofjService {
                     if (mapVariables.has(queryVar.alias)) {
                         throw new Error(`Alias Conflit: alias '${queryVar.alias}'`)
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { _isValid, ...props } = queryVar.properties;
                     mapVariables.set(queryVar.alias, props)
                 }
             }
         })
         const session = this.neo4j.session()
+
         const fullq = queries.map(q => q.query).join('\n')
+        queries.forEach(q => this.logger.log(q.query.trim()))
         return session.run(fullq, mapVariables.size > 0 ? Object.fromEntries(Array.from(mapVariables.entries())) : undefined)
     }
 }
