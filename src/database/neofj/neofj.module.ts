@@ -31,6 +31,7 @@ export class NeofjModule {
                  * just create a provider with the Dynamic module options in the params
                  * and to import the return useFactory for the config of the db 
                  */
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 { provide: CONFIG, useFactory: options.useFactory!, inject: options.inject },
                 /**
                  * finaly provide the session for the exported service 

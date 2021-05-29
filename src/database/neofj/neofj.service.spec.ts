@@ -23,7 +23,7 @@ describe('NeofjService', () => {
         }
         service = new NeofjService(neo4j)
     })
-    describe('runMulti', () => {
+    describe('run', () => {
         // describe.skip('transaction', () => ({}))
         describe('session', () => {
             it('Should open a new session when call', async () => {
@@ -153,6 +153,31 @@ describe('NeofjService', () => {
             })
 
 
+        })
+        describe('query with variables', () => {
+            it('Should throw when the query template does not countain the alias', async () => {
+                await (expect(service.run([{
+                    query: 'hi', variables: [
+                        INode.createNodeOptional({ instancor: TestNode, alias: 'A', props: { stringProp: 'coucou' } }),
+                    ]
+                }]))).rejects.toThrowError("Variable '$A' provided but not found in the query")
+
+            })
+            it('Should throw when the query template does not countain the properties', async () => {
+                await (expect(service.run([{
+                    query: 'hi $A', variables: [
+                        INode.createNodeOptional({ instancor: TestNode, alias: 'A', props: { stringProp: 'coucou' } }),
+                    ]
+                }]))).rejects.toThrowError("Variable '$A.stringProp' provided but not found in the query")
+            })
+            it('Should throw when the query template does not countain the properties fo the second query', async () => {
+                await (expect(service.run([{
+                    query: 'hi $A.stringProp $B.stringProp', variables: [
+                        INode.createNodeOptional({ instancor: TestNode, alias: 'A', props: { stringProp: 'coucou' } }),
+                        INode.createNodeOptional({ instancor: TestNode, alias: 'B', props: { stringProp: 'coucou', numberProp: 4 } }),
+                    ]
+                }]))).rejects.toThrowError("Variable '$B.numberProp' provided but not found in the query")
+            })
         })
     })
 

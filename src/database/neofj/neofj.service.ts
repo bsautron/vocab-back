@@ -36,6 +36,7 @@ export class NeofjService {
         if (!queries || queries.length === 0) {
             throw new Error('No query given')
         }
+
         queries.forEach(q => {
             if (q.query.length === 0) {
                 throw new Error('No query given')
@@ -52,11 +53,42 @@ export class NeofjService {
                 }
             }
         })
+        const fullq = queries.map(q => q.query).join('\n')
+
+        /** Get all path and chek if it's in the query template */
+        const propsPaths = queries
+            .filter(q => q.variables?.length)
+            .flatMap(q => q.variables?.flatMap(v => this.jsonToPaths('$' + v.alias, v.properties)))
+            .filter(p => !p?.includes('_isValid'))
+            .forEach(p => {
+                if (!fullq.includes(p as string)) {
+                    throw new Error(`Variable '${p}' provided but not found in the query`);
+                }
+            })
+
         const session = this.neo4j.session()
 
-        const fullq = queries.map(q => q.query).join('\n')
         queries.forEach(q => this.logger.log(q.query.trim()))
         return session.run(fullq, mapVariables.size > 0 ? Object.fromEntries(Array.from(mapVariables.entries())) : undefined)
+    }
+
+    /**
+     * Transorfm the object to a list a all different path
+     * @param prefix the prefix of the path, whill be join with a dot
+     * @param obj the obj to transform
+     */
+    protected jsonToPaths(prefix: string, obj: Record<string, unknown>) {
+        const ret: string[] = []
+        if (prefix) ret.push(prefix)
+        if (!obj) return ret
+        for (const key in obj) {
+            if (typeof obj[key] === 'object') {
+                ret.push(...this.jsonToPaths(`${prefix}.${key}`, obj[key] as Record<string, unknown>))
+            } else {
+                ret.push(`${prefix ? prefix + '.' : ''}${key}`)
+            }
+        }
+        return ret
     }
 }
 
