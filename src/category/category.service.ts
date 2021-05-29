@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { query } from 'express';
 import { INode } from '../database/neofj/neofj.resolver';
 import { NeofjService } from '../database/neofj/neofj.service';
 import { TagService } from '../tag/tag.service';
@@ -15,24 +16,30 @@ export class CategoryService {
 
 
     async addCategory(categoryPayload: AddCategoryPayload): Promise<Category> {
-        const { records } = await this.neofjService.run(`CREATE (a:Category {
-            id: $category.id,
-            slug: $category.slug,
-            image: $category.image,
-            fr: $category.fr,
-            es: $category.es
-        }) RETURN a`, [
-            INode.createNodeWithId({
-                c: Category,
-                alias: 'category',
-                props: categoryPayload
-            })
+        const { records } = await this.neofjService.run([
+            {
+                query: `CREATE (c:Category {
+                    id: $category.id,
+                    slug: $category.slug,
+                    image: $category.image,
+                    fr: $category.fr,
+                    es: $category.es
+                })`,
+                variables: [
+                    INode.createNodeWithId({
+                        instancor: Category,
+                        alias: 'category',
+                        props: categoryPayload
+                    })
+                ]
+            },
+            { query: 'RETURN c' }
         ])
-        return records.map(r => r.toObject().a.properties)[0]
+        return records.map(r => r.toObject().c.properties)[0]
     }
 
     async getCategories(filters?): Promise<Category[]> {
-        const { records } = await this.neofjService.run('MATCH (c:Category) RETURN c')
+        const { records } = await this.neofjService.run([{ query: 'MATCH (c:Category) RETURN c' }])
         return records.map(record => record.toObject().c.properties)
     }
 }

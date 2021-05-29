@@ -24,30 +24,35 @@ export class SentenceService {
 
         // console.log('sen:', sen) /* dump variable */
         // console.log('cate:', cate) /* dump variable */
-        const { records } = await this.neofjService.run(`
-            CREATE (s:Sentence {
-                id: $sentence.id,
-                fr: $sentence.fr,
-                es: $sentence.es,
-            })
-            MATCH (c:Category {id: $relations.category.id})
-            MERGE (s)-[:BELONGS_TO]->(c)
-            RETURN s
-        `, [
-            INode.createNodeWithId({
-                c: Sentence,
-                alias: 'sentence',
-                props: sentence
-            })
+        const { records } = await this.neofjService.run([
+            {
+                query: `CREATE (s:Sentence {
+                    id: $sentence.id,
+                    fr: $sentence.fr,
+                    es: $sentence.es
+                })`,
+                variables: [
+                    INode.createNodeWithId({
+                        instancor: Sentence,
+                        alias: 'sentence',
+                        props: sentence
+                    })
+                ]
+            },
+            {
+                query: 'MATCH(c: Category { id: $category.id })',
+                variables: [
+                    INode.createNodeOptional({
+                        instancor: Category,
+                        alias: 'category',
+                        props: { id: relations.category.id }
+                    })
+                ]
+            },
+            {
+                query: 'MERGE(s)-[: BELONGS_TO]->(c)'
+            }
         ],
-            // [
-            //     {
-            //         alias: 'category',
-            //         props: {
-            //             id: cate.item.properties.id
-            //         }
-            //     }
-            // ]
         )
         /** public toObject(): Object */
         // https://neo4j.com/docs/api/javascript-driver/4.2/class/src/record.js~Record.html

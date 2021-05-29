@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "strictNullChecks": true,
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -11,6 +12,5 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "strictNullChecks": false
   }
 }

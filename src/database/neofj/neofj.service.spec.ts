@@ -1,18 +1,19 @@
+
 import { INode } from "./neofj.resolver"
 import { NeofjService } from "./neofj.service"
 
 class TestNode implements INode {
     id: string
 
-    numberProp: number
-    stringProp: string
-    boolProp: boolean
-    objProp: Record<string, unknown>
+    numberProp?: number
+    stringProp?: string
+    boolProp?: boolean
+    objProp?: Record<string, unknown>
 }
 
 describe('NeofjService', () => {
-    let service: NeofjService
-    let session
+    let service: NeofjService;
+    let session = { run: jest.fn() }
     let neo4j
 
     beforeEach(() => {
@@ -32,9 +33,6 @@ describe('NeofjService', () => {
         })
         describe('no query', () => {
             it('Should throw when no lines given', async () => {
-                await expect(service.run()).rejects.toThrowError('No query given')
-                await expect(service.run(null)).rejects.toThrowError('No query given')
-                await expect(service.run(undefined)).rejects.toThrowError('No query given')
                 await expect(service.run([])).rejects.toThrowError('No query given')
             })
             it('Should throw when empty line', async () => {
@@ -57,13 +55,18 @@ describe('NeofjService', () => {
                 await service.run([{ query: 'Hi' }, { query: 'Bruno' }])
                 expect(session.run).toBeCalledWith(['Hi', 'Bruno'].join('\n'), undefined)
             })
+            it('Should throw if session.run throw', async () => {
+                session.run.mockRejectedValue(new Error('Syntax Error'))
+                await expect(service.run([{ query: 'Hi' }])).rejects.toThrowError('Syntax Error')
+
+            })
 
         })
         describe('variables', () => {
             it('Should run when no variables', async () => {
                 await service.run([{ query: 'Hi' }])
                 expect(session.run).toBeCalledWith('Hi', undefined)
-                await service.run([{ query: 'Hi', variables: null }])
+                await service.run([{ query: 'Hi', variables: [] }])
                 expect(session.run).toBeCalledWith('Hi', undefined)
                 await service.run([{ query: 'Hi', variables: undefined }])
                 expect(session.run).toBeCalledWith('Hi', undefined)
@@ -73,9 +76,9 @@ describe('NeofjService', () => {
             describe('compute', () => {
 
                 it('Should compute when only one variable given', async () => {
-                    await service.run([{ query: 'Hi', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } })] }])
+                    await service.run([{ query: 'Hi', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })] }])
                     expect(session.run).toBeCalledWith('Hi', {
-                        'A': { boolProp: false }
+                        'A': { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false }
                     })
                 })
                 it('Should compute complex props when no conflit', async () => {
@@ -87,7 +90,7 @@ describe('NeofjService', () => {
                                     alias: 'A',
                                     instancor: TestNode,
                                     props: {
-                                        id: 'coucou',
+                                        id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81",
                                         numberProp: 3,
                                         stringProp: "pqif",
                                         boolProp: false,
@@ -99,7 +102,7 @@ describe('NeofjService', () => {
                     ])
                     expect(session.run).toBeCalledWith('Hi', {
                         'A': {
-                            id: 'coucou',
+                            id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81",
                             numberProp: 3,
                             stringProp: "pqif",
                             boolProp: false,
@@ -109,12 +112,12 @@ describe('NeofjService', () => {
                 })
                 it('Should compute multine line when no conflit', async () => {
                     await service.run([
-                        { query: 'Hi', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } })] },
-                        { query: 'Ho', variables: [INode.createNode({ instancor: TestNode, alias: 'B', props: { numberProp: 5 } })] }
+                        { query: 'Hi', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })] },
+                        { query: 'Ho', variables: [INode.createNode({ instancor: TestNode, alias: 'B', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", numberProp: 5 } })] }
                     ])
                     expect(session.run).toBeCalledWith(['Hi', 'Ho'].join('\n'), {
-                        'A': { boolProp: false },
-                        'B': { numberProp: 5 }
+                        'A': { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false },
+                        'B': { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", numberProp: 5 }
                     })
                 })
             })
@@ -123,8 +126,8 @@ describe('NeofjService', () => {
                     await expect(
                         service.run([{
                             query: 'Hi', variables: [
-                                INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } }),
-                                INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } })
+                                INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } }),
+                                INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })
                             ]
                         }])
                     ).rejects.toThrowError("Alias Conflit: alias 'A'")
@@ -134,14 +137,14 @@ describe('NeofjService', () => {
                         {
                             query: 'Hi',
                             variables: [
-                                INode.createNode({ instancor: TestNode, alias: 'A', props: { stringProp: 'coucou' } })
+                                INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", stringProp: 'coucou' } })
                             ]
                         },
                         {
                             query: 'Ho',
                             variables: [
-                                INode.createNode({ instancor: TestNode, alias: 'B', props: { boolProp: false } }),
-                                INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } }),
+                                INode.createNode({ instancor: TestNode, alias: 'B', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } }),
+                                INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } }),
                             ]
                         },
                     ])

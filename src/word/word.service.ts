@@ -19,12 +19,12 @@ export class WordService {
         return data.contextResults.results.map(({ translation, sourceExamples, targetExamples, partOfSpeech }) => {
             const examples = []
 
-            for (let i = 0; i < sourceExamples.length; i++) {
-                examples.push({
-                    fr: sourceExamples[i],
-                    es: targetExamples[i],
-                })
-            }
+            // for (let i = 0; i < sourceExamples.length; i++) {
+            //     examples.push({
+            //         fr: sourceExamples[i] as string,
+            //         es: targetExamples[i] as string,
+            //     })
+            // }
             console.log('examples:', examples) /* dump variable */
             return {
                 translation,

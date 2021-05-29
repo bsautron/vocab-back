@@ -8,8 +8,8 @@ import { NeofjModule } from "./neofj/neofj.module";
             useFactory: async (config: ConfigService) => {
                 return {
                     uri: config.get<string>("NEOFJ_URI") ?? 'bolt://localhost',
-                    user: config.get<string>("NEOFJ_USER"),
-                    password: config.get<string>("NEOFJ_PASSWORD")
+                    user: config.get<string>("NEOFJ_USER") ?? 'test',
+                    password: config.get<string>("NEOFJ_PASSWORD") ?? 'test'
                 }
             },
             inject: [ConfigService],
