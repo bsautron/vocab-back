@@ -6,31 +6,31 @@ import { SentenceService } from './sentence.service';
 import { Category } from '../category/category.entity';
 import { INode } from '../database/neofj/neofj.resolver';
 
-// @InputType()
-// export class SentenceRelationsCategoryPayload {
-//     @Field()
-//     id: string
-// }
+@InputType()
+export class SentenceRelationsCategoryPayload {
+    @Field()
+    id: string
+}
 
-// @InputType()
-// export class SentenceRelationsPayload {
-//     @Field(() => SentenceRelationsCategoryPayload)
-//     category: SentenceRelationsCategoryPayload
-// }
+@InputType()
+export class SentenceRelationsPayload {
+    @Field(() => SentenceRelationsCategoryPayload)
+    category: SentenceRelationsCategoryPayload
+}
 
-// @InputType()
-// export class AddSentencePayload implements ILocales {
+@InputType()
+export class AddSentencePayload implements ILocales {
 
-//     @Field(() => SentenceRelationsPayload)
-//     relations: SentenceRelationsPayload;
+    @Field(() => SentenceRelationsPayload)
+    relations: SentenceRelationsPayload;
 
-//     @Field({ nullable: true })
-//     fr?: string;
+    @Field({ nullable: true })
+    fr?: string;
 
-//     @Field({ nullable: true })
-//     es?: string;
+    @Field({ nullable: true })
+    es?: string;
 
-// }
+}
 
 
 @Resolver(() => Sentence)
@@ -66,8 +66,8 @@ export class SentenceResolver {
     //     return records[0].c.properties
     // }
 
-    // @Mutation(() => Sentence)
-    // async addNewSentence(@Args('sentence') sentence: AddSentencePayload): Promise<Sentence> {
-    //     return this.sentenceService.addNewSentence(sentence)
-    // }
+    @Mutation(() => Sentence)
+    async addNewSentence(@Args('sentence') sentence: AddSentencePayload): Promise<Sentence> {
+        return this.sentenceService.addNewSentence(sentence)
+    }
 }

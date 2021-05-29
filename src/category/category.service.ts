@@ -21,14 +21,16 @@ export class CategoryService {
             image: $category.image,
             fr: $category.fr,
             es: $category.es
-        }) RETURN a`, [{
-            alias: 'category',
-            properties: INode.createNodeWithId(Category, categoryPayload)
-        }
+        }) RETURN a`, [
+            INode.createNodeWithId({
+                c: Category,
+                alias: 'category',
+                props: categoryPayload
+            })
         ])
-        // const record = await this.neofjService.createOne(Category, categoryPayload)
         return records.map(r => r.toObject().a.properties)[0]
     }
+
     async getCategories(filters?): Promise<Category[]> {
         const { records } = await this.neofjService.run('MATCH (c:Category) RETURN c')
         return records.map(record => record.toObject().c.properties)

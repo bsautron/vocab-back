@@ -6,12 +6,24 @@ import { User } from "../../user/user.entity";
 import { v4 as uuid } from 'uuid'
 import { INode, ValidNode } from "./neofj.resolver";
 import { Sentence } from "../../sentence/sentence.entity";
+import { Transaction } from "neo4j-driver";
 
 interface ValidVariables {
     alias: string,
     properties: ValidNode<INode>
 }
+interface ValidRelationship {
+    alias: string,
+    props: {
+        id: string,
+        [key: string]: unknown
+    }
+}
 
+interface QueryLine {
+    query: string,
+    variables?: ValidVariables[]
+}
 @Injectable()
 export class NeofjService {
     private readonly logger = new Logger(NeofjService.name);
@@ -21,25 +33,45 @@ export class NeofjService {
     ) { }
 
 
-    async run(query, variables: ValidVariables[] = []) {
-        this.logger.log(query)
-        this.logger.debug({ variables })
+    // async run(query: string, variables: ValidVariables[] = [], relationsShip: ValidRelationship[] = [], transaction?: Transaction) {
+    //     const session = !transaction ? this.neo4j.session() : null
+    //     this.logger.log(query)
+    //     this.logger.debug({ variables })
+    //     const formatedVariables = Object.fromEntries(variables.map(v => [v.alias, v.properties]));
+    //     console.log('relationsShip:', relationsShip) /* dump variable */
+    //     if (session) {
+    //         return session.run(query, formatedVariables)
+    //     }
+    //     return transaction.run(query, formatedVariables)
+    //     // this.logger.debug({ res })
+    // }
+
+
+    async run(query: QueryLine[] = []) {
+        const mapVariables = new Map<string, unknown>()
+        if (!query || query.length === 0) {
+            throw new Error('No query given')
+        }
+        query.forEach(q => {
+            if (q.query.length === 0) {
+                throw new Error('No query given')
+
+            }
+            if (q.variables) {
+                for (const queryVar of q.variables) {
+                    if (mapVariables.has(queryVar.alias)) {
+                        throw new Error(`Alias Conflit: alias '${queryVar.alias}'`)
+                    }
+                    const { _isValid, ...props } = queryVar.properties;
+                    mapVariables.set(queryVar.alias, props)
+                }
+            }
+        })
         const session = this.neo4j.session()
-        const formatedVariables = Object.fromEntries(variables.map(v => [v.alias, v.properties]));
-        const res = await session.run(query, formatedVariables)
-        // this.logger.debug({ res })
-        return res
+        const fullq = query.map(q => q.query).join('\n')
+        await session.run(fullq, mapVariables.size > 0 ? Object.fromEntries(Array.from(mapVariables.entries())) : undefined)
     }
-
 }
-// async validate<T extends Record<string, unknown>>(instansor: new () => T, props: { [K in keyof T]?: T[K] }) {
-//     const item = new instansor()
-//     for (const key in props) {
-//         item[key] = props[key]
-//     }
-
-//     return validateOrReject(item)
-// }
 
 // async createOne<T>(
 //     instencor: (new (props: { [K in keyof INode<T>]?: INode<T>[K] }) => T),
