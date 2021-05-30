@@ -55,7 +55,9 @@ export abstract class INode {
      * Use it when before you whan match the node in the db
      * @param options options for create the node
      */
-    static createNodeOptional<T extends INode>(options: CreateNodeOption<T, PropsOptional<T>>): NodeForCreation<T, PropsOptional<T>> {
+    static createNodeOptional<T extends INode>(options: CreateNodeOption<T, PropsOptional<T>>): NodeForCreation<T, PropsOptional<T>> | null {
+        const allAreUndef = Object.keys(options.props).every(key => options.props[key] === undefined)
+        if (allAreUndef) return null
         return this.createGenericNode<T, PropsOptional<T>>(options)
     }
 
@@ -78,6 +80,7 @@ export abstract class INode {
         }
         const instance = new options.instancor()
 
+        Object.keys(options.props).forEach(key => options.props[key] === undefined && delete options.props[key])
         Object.assign(instance, options.props)
         const err = validateSync(instance as Record<string, unknown>, { skipMissingProperties: true })
         if (err?.length) {

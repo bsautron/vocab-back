@@ -53,7 +53,7 @@ describe('NeofjService', () => {
             })
             it('Should concact lines when multilines given', async () => {
                 await service.run([{ query: 'Hi' }, { query: 'Bruno' }])
-                expect(session.run).toBeCalledWith(['Hi', 'Bruno'].join('\n'), undefined)
+                expect(session.run).toBeCalledWith('Hi Bruno', undefined)
             })
             it('Should throw if session.run throw', async () => {
                 session.run.mockRejectedValue(new Error('Syntax Error'))
@@ -63,6 +63,10 @@ describe('NeofjService', () => {
 
         })
         describe('variables', () => {
+            it('Should run when all properties are', async () => {
+                await service.run([{ query: 'Hi $A.id $A.boolProp', variables: [INode.createNodeOptional({ instancor: TestNode, alias: 'A', props: { id: undefined, boolProp: undefined } })] }])
+                expect(session.run).toBeCalledWith('Hi $A.id $A.boolProp', undefined)
+            })
             it('Should run when no variables', async () => {
                 await service.run([{ query: 'Hi' }])
                 expect(session.run).toBeCalledWith('Hi', undefined)
@@ -76,15 +80,15 @@ describe('NeofjService', () => {
             describe('compute', () => {
 
                 it('Should compute when only one variable given', async () => {
-                    await service.run([{ query: 'Hi', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })] }])
-                    expect(session.run).toBeCalledWith('Hi', {
+                    await service.run([{ query: 'Hi $A.id $A.boolProp', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })] }])
+                    expect(session.run).toBeCalledWith('Hi $A.id $A.boolProp', {
                         'A': { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false }
                     })
                 })
                 it('Should compute complex props when no conflit', async () => {
                     await service.run([
                         {
-                            query: 'Hi',
+                            query: 'Hi $A.id $A.numberProp $A.stringProp $A.boolProp $A.objProp.sub',
                             variables: [
                                 INode.createNode({
                                     alias: 'A',
@@ -100,7 +104,7 @@ describe('NeofjService', () => {
                             ]
                         }
                     ])
-                    expect(session.run).toBeCalledWith('Hi', {
+                    expect(session.run).toBeCalledWith('Hi $A.id $A.numberProp $A.stringProp $A.boolProp $A.objProp.sub', {
                         'A': {
                             id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81",
                             numberProp: 3,
@@ -112,10 +116,10 @@ describe('NeofjService', () => {
                 })
                 it('Should compute multine line when no conflit', async () => {
                     await service.run([
-                        { query: 'Hi', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })] },
-                        { query: 'Ho', variables: [INode.createNode({ instancor: TestNode, alias: 'B', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", numberProp: 5 } })] }
+                        { query: 'Hi $A.id $A.boolProp', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })] },
+                        { query: 'Ho $B.id $B.numberProp', variables: [INode.createNode({ instancor: TestNode, alias: 'B', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", numberProp: 5 } })] }
                     ])
-                    expect(session.run).toBeCalledWith(['Hi', 'Ho'].join('\n'), {
+                    expect(session.run).toBeCalledWith('Hi $A.id $A.boolProp Ho $B.id $B.numberProp', {
                         'A': { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false },
                         'B': { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", numberProp: 5 }
                     })

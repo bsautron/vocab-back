@@ -10,7 +10,7 @@ import { CategoryService } from './category.service';
 @InputType()
 export class AddCategoryPayload implements ILocales {
 
-    @Field()
+    @Field({ nullable: true })
     slug: string
 
     @Field({ nullable: true })
@@ -23,6 +23,22 @@ export class AddCategoryPayload implements ILocales {
     es?: string;
 }
 
+@InputType()
+export class SearchCategoryPayload implements ILocales {
+
+    @Field({ nullable: true })
+    id?: string
+
+    @Field({ nullable: true })
+    slug?: string
+
+    @Field({ nullable: true })
+    fr?: string;
+
+    @Field({ nullable: true })
+    es?: string;
+
+}
 
 @Resolver(() => Category)
 export class CategoryResolver {
@@ -33,15 +49,12 @@ export class CategoryResolver {
 
     @Mutation(() => [Category])
     async addCategories(@Args({ name: 'categories', type: () => [AddCategoryPayload] }) categories: AddCategoryPayload[]): Promise<Category[]> {
-        const c = await Promise.all(categories.map(category => this.categoryService.addCategory(category)))
-        console.log('c:', c) /* dump variable */
-        return c
-
+        return Promise.all(categories.map(category => this.categoryService.addCategory(category)))
     }
 
     @Query(() => [Category])
     async categories(): Promise<Category[]> {
-        return this.categoryService.getCategories()
+        return this.categoryService.searchCategories()
     }
 
     @ResolveField()

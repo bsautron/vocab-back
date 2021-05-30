@@ -6,7 +6,13 @@ input AddCategoryPayload {
   es: String
   fr: String
   image: String
-  slug: String!
+  slug: String
+}
+
+input AddSentencePayload {
+  es: String
+  fr: String
+  relations: SentenceRelationsPayload!
 }
 
 type Category implements ILocales & INode {
@@ -29,10 +35,41 @@ interface INode {
 
 type Mutation {
   addCategories(categories: [AddCategoryPayload!]!): [Category!]!
+  addNewSentence(sentence: AddSentencePayload!): Sentence!
 }
 
 type Query {
   categories: [Category!]!
+  sentences(filters: SearchSentencePayload): [Sentence!]!
+}
+
+input SearchCategoryPayload {
+  es: String
+  fr: String
+  id: String
+  slug: String
+}
+
+input SearchSentencePayload {
+  category: SearchCategoryPayload
+  es: String
+  fr: String
+  id: String
+}
+
+type Sentence implements ILocales & INode {
+  category: Category!
+  es: String
+  fr: String
+  id: ID!
+}
+
+input SentenceRelationsCategoryPayload {
+  id: String!
+}
+
+input SentenceRelationsPayload {
+  category: SentenceRelationsCategoryPayload!
 }
 
 type Tag implements ILocales & INode {

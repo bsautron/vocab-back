@@ -45,13 +45,21 @@ describe('NeofjResolver', () => {
             })
         })
         describe('static createNodeOptional', () => {
+            it('Should return null when all properties are undefined', async () => {
+                const node = INode.createNodeOptional({
+                    alias: 'A',
+                    instancor: TestNode,
+                    props: { optionalBoolProp: undefined }
+                })
+                expect(node).toBeNull()
+            })
             it('Should generate a partial node', () => {
                 const node = INode.createNodeOptional({
                     alias: 'A',
                     instancor: TestNode,
                     props: { optionalBoolProp: true }
                 })
-                expect(node.properties.optionalBoolProp).toBe(true)
+                expect(node!.properties.optionalBoolProp).toBe(true)
             })
             it('Should not generate required props', () => {
                 const node = INode.createNodeOptional({
@@ -59,7 +67,7 @@ describe('NeofjResolver', () => {
                     instancor: TestNode,
                     props: { optionalBoolProp: true }
                 })
-                expect(node.properties.requiredStringProp).not.toBeDefined()
+                expect(node!.properties.requiredStringProp).not.toBeDefined()
             })
         })
         describe('static createNodeWithId', () => {

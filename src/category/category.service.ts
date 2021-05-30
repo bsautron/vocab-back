@@ -4,7 +4,7 @@ import { INode } from '../database/neofj/neofj.resolver';
 import { NeofjService } from '../database/neofj/neofj.service';
 import { TagService } from '../tag/tag.service';
 import { Category } from './category.entity';
-import { AddCategoryPayload } from './category.resolver'
+import { AddCategoryPayload, SearchCategoryPayload } from './category.resolver'
 
 @Injectable()
 export class CategoryService {
@@ -38,7 +38,7 @@ export class CategoryService {
         return records.map(r => r.toObject().c.properties)[0]
     }
 
-    async getCategories(filters?): Promise<Category[]> {
+    async searchCategories(filters?: SearchCategoryPayload): Promise<Category[]> {
         const { records } = await this.neofjService.run([{ query: 'MATCH (c:Category) RETURN c' }])
         return records.map(record => record.toObject().c.properties)
     }

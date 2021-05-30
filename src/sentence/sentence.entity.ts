@@ -1,9 +1,9 @@
-import { ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { ILocales } from '../locales/locales.interface.entity';
-import { User } from '../user/user.entity';
 import { INode } from '../database/neofj/neofj.resolver';
+import { Category } from '../category/category.entity';
 
-// @ObjectType({ implements: [ILocales] })
+@ObjectType({ implements: [INode, ILocales] })
 export class Sentence implements INode, ILocales {
 
     id: string
@@ -11,8 +11,8 @@ export class Sentence implements INode, ILocales {
     es?: string;
 
 
-    // @Field(() => Category)
-    // category: Promise<Category> | Category
+    @Field(() => Category)
+    category: Promise<Category>
 
 }
 

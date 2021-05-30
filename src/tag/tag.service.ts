@@ -17,7 +17,7 @@ export class TagService {
                         instancor: Category,
                         alias: 'category',
                         props: {
-                            id: categoryId
+                            id: 'sdf'
                         }
                     })
                 ]

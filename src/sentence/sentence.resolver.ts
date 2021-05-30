@@ -5,6 +5,8 @@ import { Sentence } from './sentence.entity';
 import { SentenceService } from './sentence.service';
 import { Category } from '../category/category.entity';
 import { INode } from '../database/neofj/neofj.resolver';
+import { SearchCategoryPayload } from '../category/category.resolver';
+import { CategoryService } from '../category/category.service';
 
 @InputType()
 export class SentenceRelationsCategoryPayload {
@@ -32,39 +34,46 @@ export class AddSentencePayload implements ILocales {
 
 }
 
+@InputType()
+export class SearchSentencePayload implements ILocales {
+    @Field({ nullable: true })
+    id?: string;
+
+    @Field({ nullable: true })
+    fr?: string;
+
+    @Field({ nullable: true })
+    es?: string;
+
+    @Field(() => SearchCategoryPayload, { nullable: true })
+    category?: SearchCategoryPayload
+
+}
+
+
 
 @Resolver(() => Sentence)
 export class SentenceResolver {
     constructor(
-        protected neofjService: NeofjService,
         protected sentenceService: SentenceService,
+        protected CategoryService: CategoryService,
     ) { }
 
-    // // TODO: Toujours en filters
-    // @Query(() => [Sentence])
-    // async sentences(@Args({ name: 'category', type: () => String }) category: string): Promise<Sentence[]> {
-    //     // Faire des match differents selon les ARGS
-    //     // Toujour return un seul type de node (ici r)
-    //     // Meme si je complexify lq query
-    //     // les fieldresolver iront rematcher les sous node
+    // TODO: Toujours en filters
+    @Query(() => [Sentence])
+    async sentences(@Args({ name: 'filters', type: () => SearchSentencePayload, nullable: true }) filters?: SearchSentencePayload): Promise<Sentence[]> {
+        // Faire des match differents selon les ARGS
+        // Toujour return un seul type de node (ici r)
+        // Meme si je complexify lq query
+        // les fieldresolver iront rematcher les sous node
 
-    //     const { records } = await this.neofjService.run('MATCH (s:Sentence)-[:BELONGS_TO]->(c:Category { slug: $category.slug }) RETURN s', [{
-    //         name: 'category',
-    //         properties: INode.createNode(Category, { slug: category })
-    //     }])
-    //     const res = records.map(record => record.s.properties)
-    //     console.log('res:', res) /* dump variable */
-    //     return res
-    // }
+        return this.sentenceService.searchSentences(filters)
+    }
 
-    // @ResolveField(() => Category)
-    // async category(@Parent() sentence: Sentence): Promise<Category> {
-    //     const { records } = await this.neofjService.run('MATCH (s:Sentence {id: $sentence.id})-[:BELONGS_TO]->(c:Category) return DISTINCT c', [{
-    //         alias: 'sentence',
-    //         properties: INode.createNode(Sentence, { id: sentence.id })
-    //     }])
-    //     return records[0].c.properties
-    // }
+    @ResolveField(() => Category)
+    async category(@Parent() sentence: Sentence): Promise<Category> {
+        return this.sentenceService.getCategoryOfTheSentence(sentence.id)
+    }
 
     @Mutation(() => Sentence)
     async addNewSentence(@Args('sentence') sentence: AddSentencePayload): Promise<Sentence> {

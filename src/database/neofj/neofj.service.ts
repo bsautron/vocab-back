@@ -4,16 +4,16 @@ import { INode, ValidNode } from "./neofj.resolver";
 /**
  * Used for map alias -> properties
  */
-interface ValidVariables {
+export interface ValidVariables {
     alias: string,
     properties: ValidNode<INode, any>
 }
 /**
  * One line to cumpute for neofj db
  */
-interface QueryLine {
+export interface QueryLine {
     query: string,
-    variables?: ValidVariables[]
+    variables?: (ValidVariables | null)[]
 }
 
 /**
@@ -43,22 +43,24 @@ export class NeofjService {
 
             }
             if (q.variables) {
-                for (const queryVar of q.variables) {
-                    if (mapVariables.has(queryVar.alias)) {
-                        throw new Error(`Alias Conflit: alias '${queryVar.alias}'`)
-                    }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { _isValid, ...props } = queryVar.properties;
-                    mapVariables.set(queryVar.alias, props)
-                }
+                q.variables
+                    .filter(v => !!v)
+                    .forEach((v: ValidVariables) => {
+                        if (mapVariables.has(v.alias)) {
+                            throw new Error(`Alias Conflit: alias '${v.alias}'`)
+                        }
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        const { _isValid, ...props } = v.properties;
+                        mapVariables.set(v.alias, props)
+                    })
             }
         })
-        const fullq = queries.map(q => q.query).join('\n')
+        const fullq = queries.map(q => q.query).join(' ')
 
         /** Get all path and chek if it's in the query template */
-        const propsPaths = queries
-            .filter(q => q.variables?.length)
-            .flatMap(q => q.variables?.flatMap(v => this.jsonToPaths('$' + v.alias, v.properties)))
+        queries
+            .filter(q => q.variables?.filter(v => !!v).length)
+            .flatMap(q => q.variables?.flatMap((v: ValidVariables) => this.jsonToPaths('$' + v.alias, v.properties)))
             .filter(p => !p?.includes('_isValid'))
             .forEach(p => {
                 if (!fullq.includes(p as string)) {
@@ -68,8 +70,9 @@ export class NeofjService {
 
         const session = this.neo4j.session()
 
-        queries.forEach(q => this.logger.log(q.query.trim()))
-        return session.run(fullq, mapVariables.size > 0 ? Object.fromEntries(Array.from(mapVariables.entries())) : undefined)
+        this.logger.log(fullq)
+        const variables = mapVariables.size > 0 ? Object.fromEntries(Array.from(mapVariables.entries())) : undefined
+        return session.run(fullq, variables)
     }
 
     /**
