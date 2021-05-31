@@ -12,7 +12,7 @@ export class Sentence implements INode, ILocales {
 
 
     @Field(() => Category)
-    category: Promise<Category>
+    protected category: Promise<Category>
 
 }
 

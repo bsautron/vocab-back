@@ -1,9 +1,7 @@
 import { Args, Field, InputType, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { NeofjService } from '../database/neofj/neofj.service';
 import { Tag } from '../tag/tag.entity';
 import { ILocales } from '../locales/locales.interface.entity';
-import { AddTagPayload } from '../tag/tag.resolver';
-import { Category } from './category.entity';
+import { Category, CategoryPreview } from './category.entity';
 import { TagService } from '../tag/tag.service';
 import { CategoryService } from './category.service';
 
@@ -24,7 +22,10 @@ export class AddCategoryPayload implements ILocales {
 }
 
 @InputType()
-export class SearchCategoryPayload implements ILocales {
+export class SearchCategoriesPayload implements ILocales {
+
+    @Field({ nullable: true })
+    search?: string
 
     @Field({ nullable: true })
     id?: string
@@ -53,12 +54,27 @@ export class CategoryResolver {
     }
 
     @Query(() => [Category])
-    async categories(): Promise<Category[]> {
-        return this.categoryService.searchCategories()
+    async categories(@Args({ name: 'filters', type: () => SearchCategoriesPayload, nullable: true }) filters?: SearchCategoriesPayload): Promise<Category[]> {
+        return this.categoryService.searchCategories(filters)
     }
 
     @ResolveField()
     async tags(@Parent() category: Category): Promise<Tag[]> {
         return this.tagService.tagsByCetagoryId(category.id)
     }
+}
+
+
+@Resolver(() => CategoryPreview)
+export class CategoryPreviewResolver {
+    constructor(
+        protected categoryService: CategoryService,
+    ) {
+
+    }
+    @Query(() => [CategoryPreview])
+    async categoryPreviews(@Args({ name: 'search' }) search: string): Promise<CategoryPreview[]> {
+        return this.categoryService.previewCategories(search)
+    }
+
 }

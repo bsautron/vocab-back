@@ -24,6 +24,22 @@ type Category implements ILocales & INode {
   tags: [Tag!]
 }
 
+type CategoryPreview implements ILocales {
+  es: String
+  fr: String
+  image: String
+  sentencePreviews: [Sentence!]
+  slug: String!
+}
+
+input FiltersSentencesPayload {
+  category: SearchCategoriesPayload
+  es: String
+  fr: String
+  id: String
+  search: String
+}
+
 interface ILocales {
   es: String
   fr: String
@@ -39,22 +55,17 @@ type Mutation {
 }
 
 type Query {
-  categories: [Category!]!
-  sentences(filters: SearchSentencePayload): [Sentence!]!
+  categories(filters: SearchCategoriesPayload): [Category!]!
+  categoryPreviews(search: String!): [CategoryPreview!]!
+  sentences(filters: FiltersSentencesPayload): [Sentence!]!
 }
 
-input SearchCategoryPayload {
+input SearchCategoriesPayload {
   es: String
   fr: String
   id: String
+  search: String
   slug: String
-}
-
-input SearchSentencePayload {
-  category: SearchCategoryPayload
-  es: String
-  fr: String
-  id: String
 }
 
 type Sentence implements ILocales & INode {

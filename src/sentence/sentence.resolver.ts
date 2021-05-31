@@ -1,12 +1,9 @@
 import { Args, Field, InputType, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { NeofjService } from '../database/neofj/neofj.service';
 import { ILocales } from '../locales/locales.interface.entity';
 import { Sentence } from './sentence.entity';
 import { SentenceService } from './sentence.service';
 import { Category } from '../category/category.entity';
-import { INode } from '../database/neofj/neofj.resolver';
-import { SearchCategoryPayload } from '../category/category.resolver';
-import { CategoryService } from '../category/category.service';
+import { SearchCategoriesPayload } from '../category/category.resolver';
 
 @InputType()
 export class SentenceRelationsCategoryPayload {
@@ -35,7 +32,11 @@ export class AddSentencePayload implements ILocales {
 }
 
 @InputType()
-export class SearchSentencePayload implements ILocales {
+export class FiltersSentencesPayload implements ILocales {
+
+    @Field({ nullable: true })
+    search?: string;
+
     @Field({ nullable: true })
     id?: string;
 
@@ -45,8 +46,8 @@ export class SearchSentencePayload implements ILocales {
     @Field({ nullable: true })
     es?: string;
 
-    @Field(() => SearchCategoryPayload, { nullable: true })
-    category?: SearchCategoryPayload
+    @Field(() => SearchCategoriesPayload, { nullable: true })
+    category?: SearchCategoriesPayload
 
 }
 
@@ -56,18 +57,12 @@ export class SearchSentencePayload implements ILocales {
 export class SentenceResolver {
     constructor(
         protected sentenceService: SentenceService,
-        protected CategoryService: CategoryService,
     ) { }
 
-    // TODO: Toujours en filters
-    @Query(() => [Sentence])
-    async sentences(@Args({ name: 'filters', type: () => SearchSentencePayload, nullable: true }) filters?: SearchSentencePayload): Promise<Sentence[]> {
-        // Faire des match differents selon les ARGS
-        // Toujour return un seul type de node (ici r)
-        // Meme si je complexify lq query
-        // les fieldresolver iront rematcher les sous node
 
-        return this.sentenceService.searchSentences(filters)
+    @Query(() => [Sentence])
+    async sentences(@Args({ name: 'filters', type: () => FiltersSentencesPayload, nullable: true }) filters?: FiltersSentencesPayload): Promise<Sentence[]> {
+        return this.sentenceService.filterSentences(filters)
     }
 
     @ResolveField(() => Category)

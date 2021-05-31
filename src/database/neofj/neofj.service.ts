@@ -8,12 +8,19 @@ export interface ValidVariables {
     alias: string,
     properties: ValidNode<INode, any>
 }
+
+export interface AdditionalVariables {
+    alias: string,
+    properties: Record<string, unknown>
+}
+
+export type Variable = (ValidVariables | AdditionalVariables | null)
 /**
  * One line to cumpute for neofj db
  */
 export interface QueryLine {
     query: string,
-    variables?: (ValidVariables | null)[]
+    variables?: Variable[]
 }
 
 /**
@@ -45,7 +52,7 @@ export class NeofjService {
             if (q.variables) {
                 q.variables
                     .filter(v => !!v)
-                    .forEach((v: ValidVariables) => {
+                    .forEach((v: ValidVariables | AdditionalVariables) => {
                         if (mapVariables.has(v.alias)) {
                             throw new Error(`Alias Conflit: alias '${v.alias}'`)
                         }
@@ -85,7 +92,9 @@ export class NeofjService {
         if (prefix) ret.push(prefix)
         if (!obj) return ret
         for (const key in obj) {
-            if (typeof obj[key] === 'object') {
+            if (obj[key] instanceof Array) {
+                ret.push(`${prefix ? prefix + '.' : ''}${key}`)
+            } else if (typeof obj[key] === 'object') {
                 ret.push(...this.jsonToPaths(`${prefix}.${key}`, obj[key] as Record<string, unknown>))
             } else {
                 ret.push(`${prefix ? prefix + '.' : ''}${key}`)

@@ -3,11 +3,10 @@ import { NeofjService } from '../database/neofj/neofj.service';
 import { QueryLine, ValidVariables } from '../database/neofj/neofj.service'
 import { CategoryService } from '../category/category.service';
 import { Sentence } from './sentence.entity';
-import { v4 as uuid } from 'uuid'
 import { Category } from '../category/category.entity';
 import { AddSentencePayload } from './sentence.resolver';
 import { INode } from '../database/neofj/neofj.resolver';
-import { SearchSentencePayload } from './sentence.resolver'
+import { FiltersSentencesPayload } from './sentence.resolver'
 
 @Injectable()
 export class SentenceService {
@@ -19,49 +18,47 @@ export class SentenceService {
 
     async addNewSentence({ relations, ...sentence }: AddSentencePayload): Promise<Sentence> {
 
-        // const sen = await this.neofjService.createOne(Sentence, sentence)
-        // const cate = await this.neofjService.createOne(Category, { slug: 'travel/airport', fr: 'AIZE', es: 'siusdf' })
-        // const cate = await this.neofjService.matchOne(Category, { id: relations.category.id })
-
-        // console.log('sen:', sen) /* dump variable */
-        // console.log('cate:', cate) /* dump variable */
         const { records } = await this.neofjService.run([
-            // {
-            //     query: `CREATE (s:Sentence {
-            //         id: $sentence.id,
-            //         fr: $sentence.fr,
-            //         es: $sentence.es
-            //     })`,
-            //     variables: [
-            //         INode.createNodeWithId({
-            //             instancor: Sentence,
-            //             alias: 'sentence',
-            //             props: sentence
-            //         })
-            //     ]
-            // },
-            // {
-            //     query: 'MATCH(c: Category { id: $category.id })',
-            //     variables: [
-            //         INode.createNodeOptional({
-            //             instancor: Category,
-            //             alias: 'category',
-            //             props: { id: relations.category.id }
-            //         })
-            //     ]
-            // },
             {
-                query: 'MERGE(s)-[: BELONGS_TO]->(c)'
+                query: `CREATE (s:Sentence {
+                    id: $sentence.id,
+                    fr: $sentence.fr,
+                    es: $sentence.es
+                })`,
+                variables: [
+                    INode.createNodeWithId({
+                        instancor: Sentence,
+                        alias: 'sentence',
+                        props: {
+                            fr: sentence.fr,
+                            es: sentence.es,
+                        }
+                    })
+                ]
+            },
+            {
+                query: 'WITH s',
+            },
+            {
+                query: 'MATCH (c:Category { id: $category.id })',
+                variables: [
+                    INode.createNodeOptional({
+                        instancor: Category,
+                        alias: 'category',
+                        props: { id: relations.category.id }
+                    })
+                ]
+            },
+            {
+                query: 'CREATE (s)-[:BELONGS_TO]->(c) RETURN s'
             }
         ],
         )
-        /** public toObject(): Object */
-        // https://neo4j.com/docs/api/javascript-driver/4.2/class/src/record.js~Record.html
         return records.map(record => record.toObject())[0].s.properties
     }
 
 
-    async searchSentences(filters?: SearchSentencePayload) {
+    async filterSentences(filters?: FiltersSentencesPayload) {
         const queryLines: QueryLine[] = [
             { query: 'MATCH (s:Sentence), (c:Category)' },
         ]
@@ -69,13 +66,13 @@ export class SentenceService {
         if (filters) {
             const filtersLines: QueryLine[] = []
             if (filters.id) { filtersLines.push({ query: 'AND s.id = $sentence.id' }) }
-            if (filters.fr) { filtersLines.push({ query: 'AND s.fr = $sentence.fr' }) }
-            if (filters.es) { filtersLines.push({ query: 'AND s.es = $sentence.es' }) }
+            if (filters.fr) { filtersLines.push({ query: 'AND s.fr CONTAINS $sentence.fr' }) }
+            if (filters.es) { filtersLines.push({ query: 'AND s.es CONTAINS $sentence.es' }) }
 
-            if (filters.category?.slug) { filtersLines.push({ query: 'AND c.slug = $category.slug' }) }
-            if (filters.category?.es) { filtersLines.push({ query: 'AND c.es = $category.es' }) }
-            if (filters.category?.fr) { filtersLines.push({ query: 'AND c.fr = $category.fr' }) }
             if (filters.category?.id) { filtersLines.push({ query: 'AND c.id = $category.id' }) }
+            if (filters.category?.slug) { filtersLines.push({ query: 'AND c.slug = $category.slug' }) }
+            if (filters.category?.es) { filtersLines.push({ query: 'AND c.es CONTAINS $category.es' }) }
+            if (filters.category?.fr) { filtersLines.push({ query: 'AND c.fr CONTAINS $category.fr' }) }
             if (filters.category) { filtersLines.push({ query: 'AND (s)-[:BELONGS_TO]->(c)' }) }
 
 

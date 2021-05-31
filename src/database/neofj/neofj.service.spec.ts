@@ -155,6 +155,25 @@ describe('NeofjService', () => {
                     ).rejects.toThrowError("Alias Conflit: alias 'A'")
                 })
             })
+            describe('additional variables', () => {
+                it('Should compute additionnal variables', async () => {
+                    await service.run([{
+                        query: 'Hi $A.search', variables: [
+                            {
+                                alias: 'A',
+                                properties: {
+                                    search: 'sdpion'
+                                }
+                            }
+                        ]
+                    }])
+                    expect(session.run).toBeCalledWith('Hi $A.search', {
+                        'A': { search: "sdpion" }
+                    })
+
+                })
+
+            })
 
 
         })
@@ -181,6 +200,19 @@ describe('NeofjService', () => {
                         INode.createNodeOptional({ instancor: TestNode, alias: 'B', props: { stringProp: 'coucou', numberProp: 4 } }),
                     ]
                 }]))).rejects.toThrowError("Variable '$B.numberProp' provided but not found in the query")
+            })
+            it('Should not throw when an array is given', async () => {
+                await service.run([{
+                    query: 'hi $A.ids', variables: [
+                        {
+                            alias: 'A',
+                            properties: {
+                                ids: ['sdf']
+                            }
+                        }
+                    ]
+                }])
+                expect(session.run).toBeCalledTimes(1)
             })
         })
     })
