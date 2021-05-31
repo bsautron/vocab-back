@@ -33,9 +33,14 @@ export type PropsOptional<T extends INode> = {
 @InterfaceType()
 export abstract class INode {
     /** the required uuid for all nodes */
+    // TODO: use this: https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-randomuuid
     @IsUUID()
     @Field(() => ID)
     id: string;
+
+
+    //https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-timestamp
+    //createdAt, updatedAt, deletedAt
 
     /** setted only when used by the static node creation methods */
     _isValid?: boolean

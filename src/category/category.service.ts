@@ -82,26 +82,40 @@ export class CategoryService {
     }
 
     async previewCategories(search: string): Promise<CategoryPreview[]> {
-        this.logger.verbose(`previewCategories: {search: "${search}"}`) /* dump variable */
+        let queryLines: QueryLine[] = []
+        this.logger.verbose(`{search: "${search}"}`, `${CategoryService.name}: [previewCategories]`)
         if (search.trim().length === 0) {
-            return (await this.searchCategories()).map(c => ({ ...c, sentencePreviews: [] }))
-        }
-        const { records: recordsSenteces } = await this.neofjService.run([
-            {
-                query: 'CALL db.index.fulltext.queryNodes("fullSearchFrEsIndex", $search.keyWords)', variables: [
-                    {
-                        alias: 'search',
-                        properties: {
-                            keyWords: search
-                        }
-                    }
-                ]
-            },
-            { query: 'YIELD node, score' },
-            { query: 'MATCH (node)-[:BELONGS_TO]->(c:Category)' },
-            { query: 'RETURN node, c, score' },
+            queryLines = [
+                { query: 'MATCH (c:Category)' },
+                { query: 'CALL {' },
+                { query: '    WITH c' },
+                { query: '    MATCH (s:Sentence)-[:BELONGS_TO]->(c)' },
+                { query: '    RETURN s LIMIT 10' },
+                { query: '}' },
+                { query: 'RETURN c, s' },
+            ]
+        } else {
 
-        ])
+
+            queryLines = [
+                {
+                    query: 'CALL db.index.fulltext.queryNodes("fullSearchFrEsIndex", $search.keyWords)', variables: [
+                        {
+                            alias: 'search',
+                            properties: {
+                                keyWords: search
+                            }
+                        }
+                    ]
+                },
+                { query: 'YIELD node, score' },
+                { query: 'MATCH (node)-[:BELONGS_TO]->(c:Category)' },
+                { query: 'RETURN node AS s, c, score' },
+
+            ]
+        }
+
+        const { records: recordsSenteces } = await this.neofjService.run(queryLines)
 
 
         const nodes = recordsSenteces.map(r => r.toObject())
@@ -110,9 +124,9 @@ export class CategoryService {
             const props = node.c.properties
             let relatedCate = theMap.get(props.id)
             if (!relatedCate) {
-                relatedCate = { ...node.c.properties, sentencePreviews: [node.node.properties] }
+                relatedCate = { ...node.c.properties, sentencePreviews: [node.s.properties] }
             } else {
-                relatedCate.sentencePreviews.push(node.node.properties)
+                relatedCate.sentencePreviews.push(node.s.properties)
             }
             theMap.set(props.id, relatedCate)
 
