@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Sentence } from 'src/sentence/sentence.entity';
 import { INode } from '../database/neofj/neofj.resolver';
 import { NeofjService, QueryLine, Variable } from '../database/neofj/neofj.service';
 import { TagService } from '../tag/tag.service';
@@ -19,8 +20,7 @@ export class CategoryService {
     async addCategory(categoryPayload: AddCategoryPayload): Promise<Category> {
         const { records } = await this.neofjService.run([
             {
-                query: `CREATE (c:Category {
-                    id: $category.id,
+                query: `MERGE (c:Category {
                     slug: $category.slug,
                     image: $category.image,
                     fr: $category.fr,
@@ -62,7 +62,7 @@ export class CategoryService {
                     INode.createNodeOptional({
                         instancor: Category,
                         alias: 'category',
-                        props: { id: filters?.id, slug: filters?.slug, fr: filters?.fr, es: filters?.es }
+                        props: { slug: filters?.slug, fr: filters?.fr, es: filters?.es }
                     })
                 )
             }
@@ -81,10 +81,12 @@ export class CategoryService {
         return records.map(record => record.toObject().c.properties)
     }
 
-    async previewCategories(search: string): Promise<CategoryPreview[]> {
+    async previewCategories(text: string): Promise<CategoryPreview[]> {
+        const search = text.trim()
+        
         let queryLines: QueryLine[] = []
         this.logger.verbose(`{search: "${search}"}`, `${CategoryService.name}: [previewCategories]`)
-        if (search.trim().length === 0) {
+        if (search.length === 0) {
             queryLines = [
                 { query: 'MATCH (c:Category)' },
                 { query: 'CALL {' },
@@ -95,43 +97,47 @@ export class CategoryService {
                 { query: 'RETURN c, s' },
             ]
         } else {
-
-
             queryLines = [
                 {
-                    query: 'CALL db.index.fulltext.queryNodes("fullSearchFrEsIndex", $search.keyWords)', variables: [
+                    query: 'CALL db.index.fulltext.queryNodes("fullSearchFrEsIndex", toString($search.keyWords))', variables: [
                         {
                             alias: 'search',
                             properties: {
-                                keyWords: search
+                                keyWords: `*${search}*`
                             }
                         }
                     ]
                 },
                 { query: 'YIELD node, score' },
-                { query: 'MATCH (node)-[:BELONGS_TO]->(c:Category)' },
-                { query: 'RETURN node AS s, c, score' },
-
+                { query: 'OPTIONAL MATCH (node)-[:BELONGS_TO]->(nodeRelated:Category)' },
+                { query: 'RETURN node, nodeRelated, score' },
             ]
         }
 
-        const { records: recordsSenteces } = await this.neofjService.run(queryLines)
+        const { records: recordsSentences } = await this.neofjService.run(queryLines)
 
+        const nodes = recordsSentences.map(r => r.toObject())
 
-        const nodes = recordsSenteces.map(r => r.toObject())
-
-        const cateMap = nodes.reduce((theMap, node) => {
-            const props = node.c.properties
-            let relatedCate = theMap.get(props.id)
+        /**
+         * Each row contain the sentence with his category
+         * "node" can be a sentence, or a category
+         * 
+        */
+        const cateMap = nodes.reduce((theMap, {node, nodeRelated}) => {
+            /** Find what is the "node" */
+            /** If the node is a sentence, the "relatedNode" is nothing */
+            const category = node.labels.includes(Category.name) ? node : nodeRelated
+            const sentence = node.labels.includes(Sentence.name) ? node : undefined
+            let relatedCate = theMap.get(category.id)
             if (!relatedCate) {
-                relatedCate = { ...node.c.properties, sentencePreviews: [node.s.properties] }
+                relatedCate = { ...category.properties, sentencePreviews: sentence ? [sentence.properties] : [] }
             } else {
-                relatedCate.sentencePreviews.push(node.s.properties)
+                relatedCate.sentencePreviews.push(sentence.properties)
             }
-            theMap.set(props.id, relatedCate)
+            theMap.set(category.id, relatedCate)
 
             return theMap
-        }, new Map())
+        }, new Map<string, CategoryPreview>())
 
         return Array.from(cateMap.values())
     }

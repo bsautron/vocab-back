@@ -20,8 +20,7 @@ export class SentenceService {
 
         const { records } = await this.neofjService.run([
             {
-                query: `CREATE (s:Sentence {
-                    id: $sentence.id,
+                query: `MERGE (s:Sentence {
                     fr: $sentence.fr,
                     es: $sentence.es
                 })`,
@@ -37,20 +36,17 @@ export class SentenceService {
                 ]
             },
             {
-                query: 'WITH s',
-            },
-            {
-                query: 'MATCH (c:Category { id: $category.id })',
+                query: 'MERGE (c:Category { slug: $category.slug })',
                 variables: [
                     INode.createNodeOptional({
                         instancor: Category,
                         alias: 'category',
-                        props: { id: relations.category.id }
+                        props: { slug: relations.category.slug }
                     })
                 ]
             },
             {
-                query: 'CREATE (s)-[:BELONGS_TO]->(c) RETURN s'
+                query: 'MERGE (s)-[:BELONGS_TO]->(c) RETURN s'
             }
         ],
         )
@@ -86,7 +82,6 @@ export class SentenceService {
                 instancor: Sentence,
                 alias: 'sentence',
                 props: {
-                    id: filters?.id,
                     fr: filters?.fr,
                     es: filters?.es,
                 }
@@ -95,7 +90,6 @@ export class SentenceService {
                 instancor: Category,
                 alias: 'category',
                 props: {
-                    id: filters?.category?.id,
                     slug: filters?.category?.slug,
                     fr: filters?.category?.fr,
                     es: filters?.category?.es,

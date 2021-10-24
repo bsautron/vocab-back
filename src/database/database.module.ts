@@ -7,9 +7,9 @@ import { NeofjModule } from "./neofj/neofj.module";
         NeofjModule.forRootAsync({
             useFactory: async (config: ConfigService) => {
                 return {
-                    uri: config.get<string>("NEOFJ_URI") ?? 'bolt://localhost',
-                    user: config.get<string>("NEOFJ_USER") ?? 'test',
-                    password: config.get<string>("NEOFJ_PASSWORD") ?? 'test'
+                    uri: config.get<string>("NEO4J_URI") as string,
+                    user: config.get<string>("NEO4J_USER") as string,
+                    password: config.get<string>("NEO4J_PASSWORD") as string
                 }
             },
             inject: [ConfigService],

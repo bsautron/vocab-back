@@ -63,6 +63,7 @@ export class NeofjService {
             }
         })
         const fullq = queries.map(q => q.query).join(' ')
+        this.logger.log(fullq)
 
         /** Get all path and chek if it's in the query template */
         queries
@@ -70,6 +71,7 @@ export class NeofjService {
             .flatMap(q => q.variables?.flatMap((v: ValidVariables) => this.jsonToPaths('$' + v.alias, v.properties)))
             .filter(p => !p?.includes('_isValid'))
             .forEach(p => {
+                
                 if (!fullq.includes(p as string)) {
                     throw new Error(`Variable '${p}' provided but not found in the query`);
                 }
@@ -77,7 +79,6 @@ export class NeofjService {
 
         const session = this.neo4j.session()
 
-        this.logger.log(fullq)
         const variables = mapVariables.size > 0 ? Object.fromEntries(Array.from(mapVariables.entries())) : undefined
         return session.run(fullq, variables)
     }

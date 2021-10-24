@@ -23,14 +23,14 @@ describe('NeofjResolver', () => {
                 expect(() => INode.createNode({
                     alias: 'A',
                     instancor: TestNode,
-                    props: { requiredStringProp: 'sdfqs', optionalBoolProp: true, id: "sdf" }
+                    props: { requiredStringProp: 'sdfqs', optionalBoolProp: true }
                 })).toThrowError(ValidationError)
             })
             it('Should not throw when \'id\' id an uuid', () => {
                 const node = INode.createNode({
                     alias: 'A',
                     instancor: TestNode,
-                    props: { requiredStringProp: 'sdfqs', optionalBoolProp: true, id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81" }
+                    props: { requiredStringProp: 'sdfqs', optionalBoolProp: true }
                 })
                 expect(node).toBeDefined()
             })
@@ -39,7 +39,7 @@ describe('NeofjResolver', () => {
 
                     alias: 'A',
                     instancor: TestNode,
-                    props: { requiredStringProp: 'sdfqs', optionalNumberProp: 40, optionalBoolProp: true, id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81" }
+                    props: { requiredStringProp: 'sdfqs', optionalNumberProp: 40, optionalBoolProp: true }
                 })).toThrowError(ValidationError)
 
             })

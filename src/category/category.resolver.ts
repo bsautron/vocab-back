@@ -60,7 +60,7 @@ export class CategoryResolver {
 
     @ResolveField()
     async tags(@Parent() category: Category): Promise<Tag[]> {
-        return this.tagService.tagsByCetagoryId(category.id)
+        return this.tagService.tagsByCategorySlug(category.slug)
     }
 }
 

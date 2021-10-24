@@ -12,6 +12,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
+    "lib": ["ES2019"]
   },
   "include": [
     "main.ts",

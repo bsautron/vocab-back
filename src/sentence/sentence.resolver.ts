@@ -8,7 +8,7 @@ import { SearchCategoriesPayload } from '../category/category.resolver';
 @InputType()
 export class SentenceRelationsCategoryPayload {
     @Field()
-    id: string
+    slug: string
 }
 
 @InputType()

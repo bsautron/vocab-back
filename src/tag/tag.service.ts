@@ -8,16 +8,16 @@ import { Tag } from './tag.entity';
 export class TagService {
     constructor(protected neofjService: NeofjService) { }
 
-    async tagsByCetagoryId(categoryId: string): Promise<Tag[]> {
+    async tagsByCategorySlug(slug: string): Promise<Tag[]> {
         const { records } = await this.neofjService.run([
             {
-                query: 'MATCH (c:Category {id: $category.id})-[:HAVE_TAG]->(t:Tag) return DISTINCT t',
+                query: 'MATCH (c:Category {slug: $category.slug})-[:HAVE_TAG]->(t:Tag) return DISTINCT t',
                 variables: [
                     INode.createNodeOptional({
                         instancor: Category,
                         alias: 'category',
                         props: {
-                            id: 'sdf'
+                            slug: slug
                         }
                     })
                 ]

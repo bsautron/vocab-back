@@ -2,9 +2,7 @@
 import { INode } from "./neofj.resolver"
 import { NeofjService } from "./neofj.service"
 
-class TestNode implements INode {
-    id: string
-
+class TestNode {
     numberProp?: number
     stringProp?: string
     boolProp?: boolean
@@ -64,7 +62,7 @@ describe('NeofjService', () => {
         })
         describe('variables', () => {
             it('Should run when all properties are', async () => {
-                await service.run([{ query: 'Hi $A.id $A.boolProp', variables: [INode.createNodeOptional({ instancor: TestNode, alias: 'A', props: { id: undefined, boolProp: undefined } })] }])
+                await service.run([{ query: 'Hi $A.id $A.boolProp', variables: [INode.createNodeOptional({ instancor: TestNode, alias: 'A', props: { boolProp: undefined } })] }])
                 expect(session.run).toBeCalledWith('Hi $A.id $A.boolProp', undefined)
             })
             it('Should run when no variables', async () => {
@@ -80,9 +78,9 @@ describe('NeofjService', () => {
             describe('compute', () => {
 
                 it('Should compute when only one variable given', async () => {
-                    await service.run([{ query: 'Hi $A.id $A.boolProp', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })] }])
+                    await service.run([{ query: 'Hi $A.id $A.boolProp', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } })] }])
                     expect(session.run).toBeCalledWith('Hi $A.id $A.boolProp', {
-                        'A': { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false }
+                        'A': { boolProp: false }
                     })
                 })
                 it('Should compute complex props when no conflit', async () => {
@@ -94,7 +92,7 @@ describe('NeofjService', () => {
                                     alias: 'A',
                                     instancor: TestNode,
                                     props: {
-                                        id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81",
+                                    
                                         numberProp: 3,
                                         stringProp: "pqif",
                                         boolProp: false,
@@ -106,7 +104,7 @@ describe('NeofjService', () => {
                     ])
                     expect(session.run).toBeCalledWith('Hi $A.id $A.numberProp $A.stringProp $A.boolProp $A.objProp.sub', {
                         'A': {
-                            id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81",
+                        
                             numberProp: 3,
                             stringProp: "pqif",
                             boolProp: false,
@@ -116,12 +114,12 @@ describe('NeofjService', () => {
                 })
                 it('Should compute multine line when no conflit', async () => {
                     await service.run([
-                        { query: 'Hi $A.id $A.boolProp', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })] },
-                        { query: 'Ho $B.id $B.numberProp', variables: [INode.createNode({ instancor: TestNode, alias: 'B', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", numberProp: 5 } })] }
+                        { query: 'Hi $A.id $A.boolProp', variables: [INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } })] },
+                        { query: 'Ho $B.id $B.numberProp', variables: [INode.createNode({ instancor: TestNode, alias: 'B', props: { numberProp: 5 } })] }
                     ])
                     expect(session.run).toBeCalledWith('Hi $A.id $A.boolProp Ho $B.id $B.numberProp', {
-                        'A': { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false },
-                        'B': { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", numberProp: 5 }
+                        'A': { boolProp: false },
+                        'B': { numberProp: 5 }
                     })
                 })
             })
@@ -130,8 +128,8 @@ describe('NeofjService', () => {
                     await expect(
                         service.run([{
                             query: 'Hi', variables: [
-                                INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } }),
-                                INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } })
+                                INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } }),
+                                INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } })
                             ]
                         }])
                     ).rejects.toThrowError("Alias Conflit: alias 'A'")
@@ -141,14 +139,14 @@ describe('NeofjService', () => {
                         {
                             query: 'Hi',
                             variables: [
-                                INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", stringProp: 'coucou' } })
+                                INode.createNode({ instancor: TestNode, alias: 'A', props: { stringProp: 'coucou' } })
                             ]
                         },
                         {
                             query: 'Ho',
                             variables: [
-                                INode.createNode({ instancor: TestNode, alias: 'B', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } }),
-                                INode.createNode({ instancor: TestNode, alias: 'A', props: { id: "1c5e8af1-1ee0-4ac0-8364-79a9a440bb81", boolProp: false } }),
+                                INode.createNode({ instancor: TestNode, alias: 'B', props: { boolProp: false } }),
+                                INode.createNode({ instancor: TestNode, alias: 'A', props: { boolProp: false } }),
                             ]
                         },
                     ])

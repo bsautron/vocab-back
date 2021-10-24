@@ -76,7 +76,7 @@ type Sentence implements ILocales & INode {
 }
 
 input SentenceRelationsCategoryPayload {
-  id: String!
+  slug: String!
 }
 
 input SentenceRelationsPayload {
