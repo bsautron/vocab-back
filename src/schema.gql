@@ -32,12 +32,8 @@ type CategoryPreview implements ILocales {
   slug: String!
 }
 
-input FiltersSentencesPayload {
-  category: SearchCategoriesPayload
-  es: String
-  fr: String
-  id: String
-  search: String
+input FiltersSentencesLangsPayload {
+  langs: [Locales!]!
 }
 
 interface ILocales {
@@ -49,6 +45,17 @@ interface INode {
   id: ID!
 }
 
+type LinkedSentences {
+  from: Sentence!
+  to: Sentence!
+}
+
+"""Available locales"""
+enum Locales {
+  ES
+  FR
+}
+
 type Mutation {
   addCategories(categories: [AddCategoryPayload!]!): [Category!]!
   addNewSentence(sentence: AddSentencePayload!): Sentence!
@@ -57,7 +64,7 @@ type Mutation {
 type Query {
   categories(filters: SearchCategoriesPayload): [Category!]!
   categoryPreviews(search: String!): [CategoryPreview!]!
-  sentences(filters: FiltersSentencesPayload): [Sentence!]!
+  linkedSentences(filters: FiltersSentencesLangsPayload!): [LinkedSentences!]!
 }
 
 input SearchCategoriesPayload {
@@ -68,11 +75,13 @@ input SearchCategoriesPayload {
   slug: String
 }
 
-type Sentence implements ILocales & INode {
+type Sentence implements INode {
   category: Category!
-  es: String
-  fr: String
+  displayText: String!
   id: ID!
+  lang: Locales!
+  normalized: String!
+  slug: String!
 }
 
 input SentenceRelationsCategoryPayload {

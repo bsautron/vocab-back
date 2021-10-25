@@ -71,15 +71,17 @@ export class NeofjService {
             .flatMap(q => q.variables?.flatMap((v: ValidVariables) => this.jsonToPaths('$' + v.alias, v.properties)))
             .filter(p => !p?.includes('_isValid'))
             .forEach(p => {
-                
                 if (!fullq.includes(p as string)) {
                     throw new Error(`Variable '${p}' provided but not found in the query`);
                 }
             })
 
+            
         const session = this.neo4j.session()
-
+            
         const variables = mapVariables.size > 0 ? Object.fromEntries(Array.from(mapVariables.entries())) : undefined
+        this.logger.debug(JSON.stringify(variables))
+
         return session.run(fullq, variables)
     }
 
