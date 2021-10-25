@@ -94,7 +94,7 @@ export class CategoryService {
                 { query: '    MATCH (s:Sentence)-[:BELONGS_TO]->(c)' },
                 { query: '    RETURN s LIMIT 10' },
                 { query: '}' },
-                { query: 'RETURN c, s' },
+                { query: 'RETURN c as relatedNode, s as node' },
             ]
         } else {
             queryLines = [
