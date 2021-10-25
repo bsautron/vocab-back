@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { CategoryPreviewResolver, CategoryResolver } from './category.resolver';
+import { CategoryResolver } from './category.resolver';
 import { TagModule } from '../tag/tag.module';
 
 @Module({
@@ -10,7 +10,6 @@ import { TagModule } from '../tag/tag.module';
   providers: [
     CategoryService,
     CategoryResolver,
-    CategoryPreviewResolver
   ],
   exports: [CategoryService]
 })

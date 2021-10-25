@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { SentenceService } from './sentence.service';
-import { LinkedSentencesResolver, SentenceResolver } from './sentence.resolver';
+import { SentenceResolver } from './sentence.resolver';
 import { Sentence } from './sentence.entity';
 import { UserModule } from '../user/user.module';
 import { CategoryModule } from '../category/category.module';
@@ -10,6 +10,6 @@ import { CategoryModule } from '../category/category.module';
     CategoryModule,
     UserModule
   ],
-  providers: [SentenceService, SentenceResolver, LinkedSentencesResolver]
+  providers: [SentenceService, SentenceResolver]
 })
 export class SentenceModule { }

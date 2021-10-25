@@ -1,6 +1,6 @@
 import { Args, Field, InputType, Mutation, ObjectType, Parent, Query, registerEnumType, ResolveField, Resolver } from '@nestjs/graphql';
 import { ILocales, LocalesSelector } from '../locales/locales.interface.entity';
-import { LinkedSentences, Sentence } from './sentence.entity';
+import {  Sentence } from './sentence.entity';
 import { SentenceService } from './sentence.service';
 import { Category } from '../category/category.entity';
 import { SearchCategoriesPayload } from '../category/category.resolver';
@@ -52,8 +52,7 @@ export class FiltersSentencesPayload implements ILocales {
 
 }
 
-@InputType()
-export class FiltersSentencesLangsPayload extends LocalesSelector {}
+
 
 @Resolver(() => Sentence)
 export class SentenceResolver {
@@ -61,27 +60,20 @@ export class SentenceResolver {
         protected sentenceService: SentenceService,
     ) { }
 
-
-
-    @Query(() => [LinkedSentences])
-    async linkedSentences(@Args('filters') filters: FiltersSentencesLangsPayload
-    ): Promise<LinkedSentences[]> {
-        return this.sentenceService.matchSentences(filters.langs)
-    }
     // @Query(() => [Sentence])
     // async sentences(@Args({ name: 'filters', type: () => FiltersSentencesPayload, nullable: true }) filters?: FiltersSentencesPayload): Promise<Sentence[]> {
     //     return this.sentenceService.filterSentences(filters)
     // }
 
-    @ResolveField(() => Category)
-    async category(@Parent() sentence: Sentence): Promise<Category> {
-        return this.sentenceService.getCategoryOfTheSentence(sentence.id)
-    }
+    // @ResolveField(() => Category)
+    // async category(@Parent() sentence: Sentence): Promise<Category> {
+    //     return this.sentenceService.getCategoryOfTheSentence(sentence.id)
+    // }
 
-    @Mutation(() => Sentence)
-    async addNewSentence(@Args('sentence') sentence: AddSentencePayload): Promise<Sentence> {
-        return this.sentenceService.addNewSentence(sentence)
-    }
+    // @Mutation(() => Sentence)
+    // async addNewSentence(@Args('sentence') sentence: AddSentencePayload): Promise<Sentence> {
+    //     return this.sentenceService.addNewSentence(sentence)
+    // }
 
 
     

@@ -2,52 +2,18 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input AddCategoryPayload {
-  es: String
-  fr: String
-  image: String
-  slug: String
-}
-
-input AddSentencePayload {
-  es: String
-  fr: String
-  relations: SentenceRelationsPayload!
-}
-
-type Category implements ILocales & INode {
-  es: String
-  fr: String
+type Category implements INode {
+  displayText: String!
   id: ID!
-  image: String
-  slug: String!
-  tags: [Tag!]
-}
-
-type CategoryPreview implements ILocales {
-  es: String
-  fr: String
-  image: String
-  sentencePreviews: [Sentence!]
-  slug: String!
 }
 
 input FiltersSentencesLangsPayload {
   langs: [Locales!]!
-}
-
-interface ILocales {
-  es: String
-  fr: String
+  search: String!
 }
 
 interface INode {
   id: ID!
-}
-
-type LinkedSentences {
-  from: Sentence!
-  to: Sentence!
 }
 
 """Available locales"""
@@ -56,45 +22,22 @@ enum Locales {
   FR
 }
 
-type Mutation {
-  addCategories(categories: [AddCategoryPayload!]!): [Category!]!
-  addNewSentence(sentence: AddSentencePayload!): Sentence!
+type PreviewCategory {
+  categories: Category!
+  sentences: [Sentence!]!
+  slug: String!
 }
 
 type Query {
-  categories(filters: SearchCategoriesPayload): [Category!]!
-  categoryPreviews(search: String!): [CategoryPreview!]!
-  linkedSentences(filters: FiltersSentencesLangsPayload!): [LinkedSentences!]!
-}
-
-input SearchCategoriesPayload {
-  es: String
-  fr: String
-  id: String
-  search: String
-  slug: String
+  searchSentences(filters: FiltersSentencesLangsPayload!): [PreviewCategory!]!
 }
 
 type Sentence implements INode {
-  category: Category!
   displayText: String!
   id: ID!
-  lang: Locales!
-  normalized: String!
-  slug: String!
+  slugCategory: SlugCategory!
 }
 
-input SentenceRelationsCategoryPayload {
-  slug: String!
-}
-
-input SentenceRelationsPayload {
-  category: SentenceRelationsCategoryPayload!
-}
-
-type Tag implements ILocales & INode {
-  es: String
-  fr: String
-  id: ID!
+type SlugCategory {
   slug: String!
 }

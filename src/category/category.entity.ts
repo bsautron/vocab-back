@@ -5,38 +5,26 @@ import { INode } from '../database/neofj/neofj.resolver';
 import { ILocales } from '../locales/locales.interface.entity';
 import { Tag } from '../tag/tag.entity';
 
-@ObjectType({ implements: [INode, ILocales] })
-export class Category implements INode, ILocales {
+@ObjectType({ implements: [INode] })
+export class Category implements INode {
     id: string
-    fr?: string;
-    es?: string;
 
     @Field()
-    slug: string
-
-    @Field({ nullable: true })
-    @Matches(/\.png$/)
-    image?: string
-
-    @Field(() => [Tag], { nullable: true })
-    tags?: Tag[];
+    displayText: string
 }
 
 
-@ObjectType({ implements: [ILocales] })
-export class CategoryPreview implements ILocales {
-    fr?: string;
-    es?: string;
-
+@ObjectType()
+export class SlugCategory {
     @Field()
     slug: string
+}
 
-    @Field({ nullable: true })
-    @Matches(/\.png$/)
-    image?: string
+@ObjectType()
+export class PreviewCategory extends SlugCategory {
+    @Field(() => Category)
+    categories: Category[]
 
-
-    @Field(() => [Sentence], { nullable: true })
-    sentencePreviews?: Sentence[]
-
+    @Field(() => [Sentence])
+    sentences: Sentence[]
 }
